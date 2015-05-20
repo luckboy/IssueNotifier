@@ -1,0 +1,9 @@
+/project/project
+/project/target
+/target
+/.settings
+/.classpath
+/.project
+/AndroidManifest.xml
+/res
+*~

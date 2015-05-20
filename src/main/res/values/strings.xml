@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">IssueNotifier</string>
+    <string name="main_reposes">Repositories:</string>
+    <string name="issue_list_issues">Issues:</string>
+    <string name="main_menu_add_repos_title">Add repository</string>
+    <string name="main_menu_delete_reposes_title">Delete repository(ies)</string>
+    <string name="main_menu_start_title">Start</string>
+    <string name="main_menu_stop_title">Stop</string>
+    <string name="main_menu_settings_title">Settings</string>
+    <string-array name="settings_screen_intervals">
+        <item >30s</item>
+        <item >1min</item>
+        <item >2min</item>
+        <item >3min</item>
+        <item >5min</item>
+        <item >10min</item>
+    </string-array>
+    <string-array name="settings_screen_states">
+        <item >Open</item>
+        <item >Closed</item>
+        <item >All</item>
+    </string-array>
+    <string name="settings_screen_interval_title">Interval</string><string name="settings_screen_state_title">State</string>
+    <string name="settings_screen_interval_summary">Interval between fetching</string>
+    <string name="settings_screen_state_summary">State of fetching issues</string>
+    <string name="settings_screen_sorting_by_created_title">Sorting by creation time</string>
+    <string name="settings_screen_sorting_by_created_summary_on">Sorting by creation time</string>
+    <string name="settings_screen_sorting_by_created_summary_off">Sorting by update time</string>
+    <plurals name="notification_issues_title">
+        <item quantity="one">Issue!</item>
+        <item quantity="other">Issues!</item>
+    </plurals>
+    <plurals name="nofication_issues_title">
+        <item quantity="one">You have issue!</item>
+        <item quantity="other">You have issues!</item>
+    </plurals>
+    <string name="add_repos_user_name">User name:</string>
+    <string name="add_repos_name">Name:</string>
+    <string name="add_repos_title">Add repository</string>
+    <plurals name="delete_reposes_title">
+        <item quantity="one">Delete repository</item>
+        <item quantity="other">Delete repositories</item>
+    </plurals>
+    <plurals name="delete_reposes_message">
+        <item quantity="one">Do you want delete this repository?</item>
+        <item quantity="other">Do you want delete these repositories?</item>
+    </plurals>
+</resources>
