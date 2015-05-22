@@ -145,6 +145,32 @@ object Issue
     }
 }
 
+case class IssuePair(repos: Repository, issueInfo: IssueInfo) extends JSONable
+{
+  override def toJSONObject = {
+    val jsonObject = new JSONObject()
+    jsonObject.put("repos", repos.toJSONObject)
+    jsonObject.put("issueInfo", repos.toJSONObject)
+  }
+}
+
+object IssuePair
+{
+  implicit def fromJSONObject(jsonObject: JSONObject) =
+    try {
+      Repository.fromJSONObject(jsonObject.getJSONObject("repos")) match {
+        case Left(e)      => Left(e)
+        case Right(repos) =>
+          IssueInfo.fromJSONObject(jsonObject.getJSONObject("issueInfo")) match {
+            case Left(e)          => Left(e)
+            case Right(issueInfo) => Right(IssuePair(repos, issueInfo))
+          }
+      }
+    } catch {
+      case e: Exception => Left(e)
+    }
+}
+
 case class Comment(
     id: String,
     bodyHtml: String,
@@ -237,6 +263,11 @@ object Direction extends Enumeration
 }
 
 abstract class Server extends JSONable
+{
+  def name: String
+  
+  def apiURI: String
+}
 
 object Server
 {
@@ -257,4 +288,6 @@ case class GitHubServer(apiURI: String = "https://api.github.com") extends Serve
     jsonObject.put("class", "GitHubServer")
     jsonObject.put("apiURI", apiURI)
   }
+  
+  override def name = "GitHub"
 }

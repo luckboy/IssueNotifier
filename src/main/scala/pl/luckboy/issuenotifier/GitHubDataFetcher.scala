@@ -48,9 +48,9 @@ class GitHubDataFetcher(val apiURI: String) extends DataFetcher
       case "all"    => State.All
     }
   
-  override def fetchIssue(repos: Repository, issueInfo: IssueInfo): Either[Exception, Issue] = {
+  override def fetchIssue(repos: Repository, issueInfo: IssueInfo, timeout: Option[Int]): Either[Exception, Issue] = {
     val uri = apiURI + "/repos/" + encode(repos.userName) + "/" + encode(repos.name) + "/issues/" ++ encode(issueInfo.number.toString)
-    getJSONObject(new URI(uri)) match {
+    getJSONObject(new URI(uri), timeout) match {
       case Left(e)           => Left(e)
       case Right(jsonObject) => issueFromJSONObject(jsonObject)
     }
@@ -70,7 +70,7 @@ class GitHubDataFetcher(val apiURI: String) extends DataFetcher
     
   private def userFromJSONObject(jsonObject: JSONObject) =
     try {
-      val id = jsonObject.getLong("").toString
+      val id = jsonObject.getLong("id").toString
       val name = jsonObject.getString("login")
       val avatarURI = jsonObject.getString("avatar_url")
       Right(User(id, name, avatarURI))
@@ -79,7 +79,7 @@ class GitHubDataFetcher(val apiURI: String) extends DataFetcher
     }
 
 
-  override def fetchIssueInfos(repos: Repository, state: Option[State.Value], sorting: Option[IssueSorting.Value], dir: Option[Direction.Value], since: Option[Date], page: Option[Long], perPage: Option[Long]): Either[Exception, Vector[IssueInfo]] = {
+  override def fetchIssueInfos(repos: Repository, state: Option[State.Value], sorting: Option[IssueSorting.Value], dir: Option[Direction.Value], since: Option[Date], page: Option[Long], perPage: Option[Long], timeout: Option[Int]): Either[Exception, Vector[IssueInfo]] = {
     val paramMap = Map("per_page" -> perPage.getOrElse(defaultPerPage).toString) ++
     		state.map { s => ("state" -> stringFromState(s)) } ++
     		sorting.map { s => ("sort" -> stringFromIssueSorting(s)) } ++
@@ -88,7 +88,7 @@ class GitHubDataFetcher(val apiURI: String) extends DataFetcher
     		page.map { p => ("page" -> p.toString) }
     val paramMapStr = stringFromParams(paramMap)
     val uri = apiURI + "/repos/" + encode(repos.userName) + "/" + encode(repos.name) + "/issues" + (if(paramMapStr != "") "?" + paramMapStr else "")
-    getJSONArray(new URI(uri)) match {
+    getJSONArray(new URI(uri), timeout) match {
       case Left(e)          => Left(e)
       case Right(jsonArray) =>
         (0 until jsonArray.length()).foldLeft(Right(Vector()): Either[Exception, Vector[IssueInfo]]) {
@@ -129,7 +129,7 @@ class GitHubDataFetcher(val apiURI: String) extends DataFetcher
       case CommentSorting.Updated  => "updated"
     }
   
-  override def fetchComments(repos: Repository, issueInfo: IssueInfo, sorting: Option[CommentSorting.Value], dir: Option[Direction.Value], since: Option[Date], page: Option[Long], perPage: Option[Long]): Either[Exception, Vector[Comment]] = {
+  override def fetchComments(repos: Repository, issueInfo: IssueInfo, sorting: Option[CommentSorting.Value], dir: Option[Direction.Value], since: Option[Date], page: Option[Long], perPage: Option[Long], timeout: Option[Int]): Either[Exception, Vector[Comment]] = {
     val paramMap = Map("per_page" -> perPage.getOrElse(defaultPerPage).toString) ++
     		sorting.map { s => ("sort" -> stringFromCommentSorting(s)) } ++
     		dir.map { d => ("direction" -> stringFromDirection(d)) } ++
@@ -137,7 +137,7 @@ class GitHubDataFetcher(val apiURI: String) extends DataFetcher
     		page.map { p => ("page" -> p.toString) }
     val paramMapStr = stringFromParams(paramMap)
     val uri = apiURI + "/repos/" + encode(repos.userName) + "/" + encode(repos.name) + "/issues/" + encode(issueInfo.number.toString) + "/comments" + (if(paramMapStr != "") "?" + paramMapStr else "")
-    getJSONArray(new URI(uri)) match {
+    getJSONArray(new URI(uri), timeout) match {
       case Left(e)          => Left(e)
       case Right(jsonArray) =>
         (0 until jsonArray.length()).foldLeft(Right(Vector()): Either[Exception, Vector[Comment]]) {

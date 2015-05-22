@@ -25,8 +25,8 @@ import android.widget.ListView
 import android.widget.EditText
 import android.widget.TextView
 import java.util.ArrayList
+import java.util.List
 import scala.collection.immutable.BitSet
-import scala.collection.mutable.ArrayBuffer
 import AndroidUtils._
 import DataStorage._
 
@@ -35,20 +35,20 @@ class MainActivity extends Activity with TypedActivity
   private val mTag = getClass().getSimpleName()
     
   private var mOptionsMenu: Menu = null
+  private var mReposes: ArrayList[Repository] = null
   private var mReposListView: ListView = null
-  private var mReposList: ArrayList[Repository] = null
-  private var mReposListAdapter: MainActivity.RepositoryAdapter = null
-  private var mReposes: ArrayBuffer[Repository] = null
+  private var mReposListAdapter: MainActivity.RepositoryListAdapter = null
+  private var mSettings: Settings = null
   
   override def onCreate(bundle: Bundle)
   {
     super.onCreate(bundle)
     setContentView(R.layout.main)
-    mReposes = ArrayBuffer() ++ log(mTag, loadRepositories(this)).fold(_ => Vector(), identity)
+    val reposes = log(mTag, loadRepositories(this)).fold(_ => Vector(), identity)
+    mReposes = new ArrayList[Repository]()
+    for(repos <- reposes) mReposes.add(repos)
     mReposListView = findView(TR.reposListView)
-    mReposList = new ArrayList[Repository]()
-    for(repos <- mReposes) mReposList.add(repos)
-    mReposListAdapter = new MainActivity.RepositoryAdapter(this, mReposList)
+    mReposListAdapter = new MainActivity.RepositoryListAdapter(this, mReposes)
     mReposListView.setAdapter(mReposListAdapter)
     mReposListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       override def onItemClick(parent: AdapterView[_], view: View, position: Int, id: Long)
@@ -56,6 +56,16 @@ class MainActivity extends Activity with TypedActivity
       }
     })
     mReposListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE)
+    mSettings = Settings(this)
+    if(mOptionsMenu != null) {
+      if(mSettings.startedService) {
+        mOptionsMenu.findItem(R.id.startItem).asInstanceOf[MenuItem].setVisible(false)
+        mOptionsMenu.findItem(R.id.stopItem).asInstanceOf[MenuItem].setVisible(true)
+      } else {
+        mOptionsMenu.findItem(R.id.startItem).asInstanceOf[MenuItem].setVisible(true)
+        mOptionsMenu.findItem(R.id.stopItem).asInstanceOf[MenuItem].setVisible(false)      
+      }
+    }
   }
   
   override def onCreateDialog(id: Int, bundle: Bundle) = {
@@ -74,7 +84,6 @@ class MainActivity extends Activity with TypedActivity
             userNameEditText.setText("")
             nameEditText.setText("")
             addRepository(Repository(GitHubServer(), userName, name))
-            updateReposListView()
           }
         })
         builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -99,7 +108,6 @@ class MainActivity extends Activity with TypedActivity
             }
             mReposListView.clearChoices()
             deleteRepositories(reposIndexes)
-            updateReposListView()
           }
         })
         builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -128,6 +136,14 @@ class MainActivity extends Activity with TypedActivity
   override def onCreateOptionsMenu(menu: Menu) = {
     getMenuInflater().inflate(R.menu.main_menu, menu)
     mOptionsMenu = menu
+    mSettings = if(mSettings == null) Settings(this) else mSettings
+    if(mSettings.startedService) {
+      mOptionsMenu.findItem(R.id.startItem).asInstanceOf[MenuItem].setVisible(false)
+      mOptionsMenu.findItem(R.id.stopItem).asInstanceOf[MenuItem].setVisible(true)
+    } else {
+      mOptionsMenu.findItem(R.id.startItem).asInstanceOf[MenuItem].setVisible(true)
+      mOptionsMenu.findItem(R.id.stopItem).asInstanceOf[MenuItem].setVisible(false)      
+    }
     true
   }
   
@@ -140,12 +156,14 @@ class MainActivity extends Activity with TypedActivity
         showDialog(MainActivity.DialogDeleteReposes)
         true
       case R.id.startItem         =>
-        //startService(new Intent(this, classOf[MainService]))
+        mSettings.startedService = true
+        startService(new Intent(this, classOf[MainService]))
         mOptionsMenu.findItem(R.id.startItem).asInstanceOf[MenuItem].setVisible(false)
         mOptionsMenu.findItem(R.id.stopItem).asInstanceOf[MenuItem].setVisible(true)
         true
       case R.id.stopItem          =>
-        //stopService(new Intent(this, classOf[MainService]))
+        mSettings.startedService = false
+        stopService(new Intent(this, classOf[MainService]))
         mOptionsMenu.findItem(R.id.startItem).asInstanceOf[MenuItem].setVisible(true)
         mOptionsMenu.findItem(R.id.stopItem).asInstanceOf[MenuItem].setVisible(false)
         true
@@ -159,33 +177,28 @@ class MainActivity extends Activity with TypedActivity
   
   private def addRepository(repos: Repository)
   {
-    mReposes += repos
-    log(mTag, storeRepositories(this, Vector() ++ mReposes))
+    mReposes.add(repos)
+    log(mTag, storeRepositories(this, vectorFromList(mReposes)))
+    mReposListAdapter.notifyDataSetChanged()
   }
   
   private def deleteRepositories(reposIndexes: BitSet)
   {
-    mReposes = mReposes.zipWithIndex.filterNot { case (_, i) => reposIndexes.contains(i) }.map { _._1 }
-    log(mTag, storeRepositories(this, Vector() ++ mReposes))
-  }
-  
-  private def updateReposListView()
-  {
-    mReposList.clear()
-    for(repos <- mReposes) mReposList.add(repos)
+    for(i <- reposIndexes) mReposes.remove(i)
+    log(mTag, storeRepositories(this, vectorFromList(mReposes)))
     mReposListAdapter.notifyDataSetChanged()
   }
+  
+  private def vectorFromList[T](xs: List[T]) = (0 until xs.size()).foldLeft(Vector[T]()) { (ys, i) => ys :+ xs.get(i) }  
 }
 
 object MainActivity
 {
-  val DialogAddRepos = 0
-  val DialogDeleteReposes = 1
+  private val DialogAddRepos = 0
+  private val DialogDeleteReposes = 1
   
-  private class RepositoryAdapter(activity: Activity, reposes: ArrayList[Repository]) extends ArrayAdapter[Repository](activity, R.layout.repos_item, reposes)
+  private class RepositoryListAdapter(activity: Activity, reposes: ArrayList[Repository]) extends ArrayAdapter[Repository](activity, R.layout.repos_item, reposes)
   { 
-    val mReposes = reposes
-    
     override def getView(position: Int, convertView: View, parent: ViewGroup) = {
       var view = convertView
       val listView = parent.asInstanceOf[ListView]
@@ -193,7 +206,7 @@ object MainActivity
         view = activity.getLayoutInflater().inflate(R.layout.repos_item, null)
         val textView = view.findViewById(R.id.reposItemTextView).asInstanceOf[TextView]
         val checkBox = view.findViewById(R.id.reposItemCheckBox).asInstanceOf[CheckBox]
-        view.setTag(RepositoryAdapter.ViewHolder(textView, checkBox))
+        view.setTag(RepositoryListAdapter.ViewHolder(textView, checkBox))
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
           override def onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean)
           {
@@ -201,16 +214,16 @@ object MainActivity
           }
         })
       }
-      val viewHolder = view.getTag().asInstanceOf[RepositoryAdapter.ViewHolder]
-      viewHolder.textView.setText(stringFromRepository(mReposes.get(position)))
+      val viewHolder = view.getTag().asInstanceOf[RepositoryListAdapter.ViewHolder]
+      viewHolder.textView.setText(stringFromRepository(reposes.get(position)))
       viewHolder.checkBox.setChecked(listView.isItemChecked(position))
       view
     }
   }
   
-  object RepositoryAdapter
+  private object RepositoryListAdapter
   {
-    case class ViewHolder(textView: TextView, checkBox: CheckBox)
+    private case class ViewHolder(textView: TextView, checkBox: CheckBox)
   }
   
   private def stringFromRepository(repos: Repository) = repos.userName + "/" + repos.name

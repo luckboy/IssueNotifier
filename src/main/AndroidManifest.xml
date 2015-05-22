@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="pl.luckboy.issuenotifier">
     <uses-sdk android:minSdkVersion="11"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application android:label="@string/app_name" android:theme="@android:style/Theme.Holo.Light">
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -9,5 +10,12 @@
             </intent-filter>
         </activity>
         <activity android:name="SettingsActivity"></activity>
+        <service android:name="MainService"></service>
+        <receiver android:name="MainReceiver">
+            <intent-filter>
+                <action android:name="pl.luckboy.issuenotifier.MainReceiver.ActionIssuePairs"/>
+            </intent-filter>
+        </receiver><activity android:name="IssuePairListActivity"></activity>
+        
     </application>
 </manifest>

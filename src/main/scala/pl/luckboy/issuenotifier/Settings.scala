@@ -21,6 +21,10 @@ class Settings(preferences: SharedPreferences)
     }
   
   def sortingByCreated = preferences.getBoolean("settings_sorting_by_created", false)
+  
+  def startedService =  preferences.getBoolean("main_started_service", false)
+  
+  def startedService_=(b: Boolean) = { preferences.edit().putBoolean("main_started_service", b).commit(); () }
 }
 
 object Settings

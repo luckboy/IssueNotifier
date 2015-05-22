@@ -13,11 +13,15 @@ import org.apache.http.impl.client.DefaultHttpClient
 import org.apache.http.client.methods.HttpGet
 import org.json.JSONArray
 import org.json.JSONObject
+import org.apache.http.params.BasicHttpParams
+import org.apache.http.params.HttpConnectionParams
 
 object HttpUtils
 {
-  def getInputStream[T](uri: URI) =
+  def getInputStream[T](uri: URI, timeout: Option[Int]) =
     try {
+      val params = new BasicHttpParams()
+      for(t <- timeout) HttpConnectionParams.setConnectionTimeout(params, t)
       val client = new DefaultHttpClient()
       val request = new HttpGet(uri)
       val response = client.execute(request)
@@ -26,13 +30,13 @@ object HttpUtils
       case e: Exception => Left(e)
     }
   
-  def getString(uri: URI) =
+  def getString(uri: URI, timeout: Option[Int]) =
     try {
-      getInputStream(uri) match {
+      getInputStream(uri, timeout) match {
         case Left(e)   => Left(e)
         case Right(is) => 
           try {
-        	Right(new Scanner(is, "UTF-8").useDelimiter("\\Z").next())
+        	Right(new Scanner(is, "UTF-8").useDelimiter("\\A").next())
           } finally {
             is.close()
           }
@@ -41,16 +45,24 @@ object HttpUtils
       case e: Exception => Left(e)
     }
     
-  def getJSONObject(uri: URI) =
-    getString(uri) match {
-      case Left(e)  => Left(e)
-      case Right(s) => Right(new JSONObject(s))
+  def getJSONObject(uri: URI, timeout: Option[Int]) =
+    try {
+      getString(uri, timeout) match {
+        case Left(e)  => Left(e)
+        case Right(s) => Right(new JSONObject(s))
+      }
+    } catch {
+      case e: Exception => Left(e)
     }
 
-  def getJSONArray(uri: URI) =
-    getString(uri) match {
-      case Left(e)  => Left(e)
-      case Right(s) => Right(new JSONArray(s))
+  def getJSONArray(uri: URI, timeout: Option[Int]) =
+    try {
+      getString(uri, timeout) match {
+        case Left(e)  => Left(e)
+        case Right(s) => Right(new JSONArray(s))
+      }
+    } catch {
+      case e: Exception => Left(e)
     }
   
   def encode(s: String) = URLEncoder.encode(s, "UTF-8")

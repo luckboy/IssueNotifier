@@ -11,11 +11,11 @@ abstract class DataFetcher
 {
   def defaultPerPage: Int
   
-  def fetchIssue(repos: Repository, issueInfo: IssueInfo): Either[Exception, Issue]
+  def fetchIssue(repos: Repository, issueInfo: IssueInfo, timeout: Option[Int]): Either[Exception, Issue]
   
-  def fetchIssueInfos(repos: Repository, state: Option[State.Value], sorting: Option[IssueSorting.Value], dir: Option[Direction.Value], since: Option[Date], page: Option[Long], perPage: Option[Long]): Either[Exception, Vector[IssueInfo]]
+  def fetchIssueInfos(repos: Repository, state: Option[State.Value], sorting: Option[IssueSorting.Value], dir: Option[Direction.Value], since: Option[Date], page: Option[Long], perPage: Option[Long], timeout: Option[Int]): Either[Exception, Vector[IssueInfo]]
   
-  def fetchComments(repos: Repository, issueInfo: IssueInfo, sorting: Option[CommentSorting.Value], dir: Option[Direction.Value], since: Option[Date], page: Option[Long], perPage: Option[Long]): Either[Exception, Vector[Comment]]
+  def fetchComments(repos: Repository, issueInfo: IssueInfo, sorting: Option[CommentSorting.Value], dir: Option[Direction.Value], since: Option[Date], page: Option[Long], perPage: Option[Long], timeout: Option[Int]): Either[Exception, Vector[Comment]]
 }
 
 object DataFetcher

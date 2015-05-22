@@ -3,6 +3,7 @@
     <string name="app_name">IssueNotifier</string>
     <string name="main_reposes">Repositories:</string>
     <string name="issue_list_issues">Issues:</string>
+    <string name="issue_list_issues_from_all_reposes">Issues from all repositories:</string>
     <string name="main_menu_add_repos_title">Add repository</string>
     <string name="main_menu_delete_reposes_title">Delete repository(ies)</string>
     <string name="main_menu_start_title">Start</string>
@@ -21,7 +22,8 @@
         <item >Closed</item>
         <item >All</item>
     </string-array>
-    <string name="settings_screen_interval_title">Interval</string><string name="settings_screen_state_title">State</string>
+    <string name="settings_screen_interval_title">Interval</string>
+    <string name="settings_screen_state_title">State</string>
     <string name="settings_screen_interval_summary">Interval between fetching</string>
     <string name="settings_screen_state_summary">State of fetching issues</string>
     <string name="settings_screen_sorting_by_created_title">Sorting by creation time</string>
@@ -31,7 +33,7 @@
         <item quantity="one">Issue!</item>
         <item quantity="other">Issues!</item>
     </plurals>
-    <plurals name="nofication_issues_title">
+    <plurals name="notification_issues_message">
         <item quantity="one">You have issue!</item>
         <item quantity="other">You have issues!</item>
     </plurals>
@@ -46,4 +48,5 @@
         <item quantity="one">Do you want delete this repository?</item>
         <item quantity="other">Do you want delete these repositories?</item>
     </plurals>
+    
 </resources>
