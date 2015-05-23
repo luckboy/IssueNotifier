@@ -9,6 +9,7 @@ import android.app.Activity
 import android.os.Bundle
 import org.json.JSONObject
 import AndroidUtils._
+import LogStringUtils._
 
 class IssueListActivity extends AbstractIssueListActivity[IssueInfo]
 {
@@ -19,6 +20,18 @@ class IssueListActivity extends AbstractIssueListActivity[IssueInfo]
   private var mSorting: IssueSorting.Value = null
   private var mPage = 1L
 
+  override def onCreate(bundle: Bundle)
+  {
+    super.onCreate(bundle)
+    log(mTag, "onCreated(): created")
+  }
+  
+  override def onDestroy()
+  {
+    log(mTag, "onCreated(): destroying ...")
+    super.onDestroy()
+  }
+  
   override protected val mRepositoryFromItem = (issueInfo: IssueInfo) => mRepos
   
   override protected val mIssueInfoFromItem = (issueInfo: IssueInfo) => issueInfo
@@ -45,12 +58,21 @@ class IssueListActivity extends AbstractIssueListActivity[IssueInfo]
     val tmpState = mState
     val tmpSorting = mSorting
     val tmpPage = mPage
+    log(mTag, "loadItems(): tmpState = " + tmpState)
+    log(mTag, "loadItems(): tmpSorting = " + tmpSorting)
+    log(mTag, "loadItems(): tmpPage = " + tmpPage)
+    log(mTag, "loadItems(): tmpRepos = " + stringFromRepository(tmpRepos))
     startThreadAndPost(mHandler, mStopFlag) {
       () =>
-        val res = MainService.DataFetchers.get(mRepos.server).map {
-          dataFetcher => dataFetcher.fetchIssueInfos(
-              tmpRepos, Some(tmpState), Some(tmpSorting), Some(Direction.Desc), None,
-              Some(tmpPage), Some(mPerPage), Some(30000))
+        val res = MainService.DataFetchers.get(tmpRepos.server).map {
+          dataFetcher => 
+            log(mTag, "loadItems(): fetching issues from " + stringFromRepository(tmpRepos) + " ...")
+            val res = log(mTag, dataFetcher.fetchIssueInfos(
+                tmpRepos, Some(tmpState), Some(tmpSorting), Some(Direction.Desc), None,
+                Some(tmpPage), Some(mPerPage), Some(30000)))
+            log(mTag, "loadItems(): fetched issues from " + stringFromRepository(tmpRepos) +
+                res.fold(_ => "", issueInfo => " (issueInfoCount = " + issueInfo.size + ")"))
+            res
         }.getOrElse(Right(Vector()))
         res match {
           case Left(e)           => Vector()

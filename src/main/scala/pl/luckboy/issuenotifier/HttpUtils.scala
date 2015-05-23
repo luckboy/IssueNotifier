@@ -18,21 +18,23 @@ import org.apache.http.params.HttpConnectionParams
 
 object HttpUtils
 {
-  def getInputStream[T](uri: URI, timeout: Option[Int]) =
+  def getInputStream[T](uri: URI, timeout: Option[Int], headers: Map[String, String]) =
     try {
       val params = new BasicHttpParams()
       for(t <- timeout) HttpConnectionParams.setConnectionTimeout(params, t)
       val client = new DefaultHttpClient()
       val request = new HttpGet(uri)
+      request.setHeader("User-Agent", "IssueNotifier")
+      for(p <- headers) request.setHeader(p._1, p._2)
       val response = client.execute(request)
       Right(response.getEntity().getContent())
     } catch {
       case e: Exception => Left(e)
     }
   
-  def getString(uri: URI, timeout: Option[Int]) =
+  def getString(uri: URI, timeout: Option[Int], headers: Map[String, String]) =
     try {
-      getInputStream(uri, timeout) match {
+      getInputStream(uri, timeout, headers) match {
         case Left(e)   => Left(e)
         case Right(is) => 
           try {
@@ -44,10 +46,10 @@ object HttpUtils
     } catch {
       case e: Exception => Left(e)
     }
-    
-  def getJSONObject(uri: URI, timeout: Option[Int]) =
+  
+  def getJSONObject(uri: URI, timeout: Option[Int], headers: Map[String, String]) =
     try {
-      getString(uri, timeout) match {
+      getString(uri, timeout, headers) match {
         case Left(e)  => Left(e)
         case Right(s) => Right(new JSONObject(s))
       }
@@ -55,9 +57,9 @@ object HttpUtils
       case e: Exception => Left(e)
     }
 
-  def getJSONArray(uri: URI, timeout: Option[Int]) =
+  def getJSONArray(uri: URI, timeout: Option[Int], headers: Map[String, String]) =
     try {
-      getString(uri, timeout) match {
+      getString(uri, timeout, headers) match {
         case Left(e)  => Left(e)
         case Right(s) => Right(new JSONArray(s))
       }

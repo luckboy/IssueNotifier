@@ -8,12 +8,13 @@ package pl.luckboy.issuenotifier
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Handler
 import android.os.Binder
 import java.util.Date
 import AndroidUtils._
 import DataStorage._
-import android.content.IntentFilter
+import LogStringUtils._
 
 class MainService extends Service
 {
@@ -22,7 +23,6 @@ class MainService extends Service
   private var mHandler: Handler = null
   private var mReposes: Vector[Repository] = null
   private var mLastReposTimestampInfos: Map[Repository, RepositoryTimestampInfo] = null
-  private var mOldReposTimestampInfos: Map[Repository, RepositoryTimestampInfo] = null
   private var mStopFlag: StopFlag = null
   private var mSettings: Settings = null
   
@@ -41,7 +41,7 @@ class MainService extends Service
   {
     val tmpReposes = mReposes
     val tmpLastReposTimestampInfos = mLastReposTimestampInfos
-    val tmpOldReposTimestampInfos = mOldReposTimestampInfos
+    val tmpOldReposTimestampInfos = log(mTag, loadOldRepositoryTimestampInfos(this)).fold(_ => Map[Repository, RepositoryTimestampInfo](), identity)
     val tmpInterval = mSettings.interval
     val tmpState = mSettings.state
     val tmpSortingByCreated = mSettings.sortingByCreated
@@ -50,9 +50,11 @@ class MainService extends Service
     log(mTag, "fetchAndNotify(): tmpState = " + tmpState)
     log(mTag, "fetchAndNotify(): tmpSortingByCreated = " + tmpSortingByCreated)
     log(mTag, "fetchAndNotify(): tmpSorting = " + tmpSorting)
-    for(p <- mLastReposTimestampInfos)
+    for(p <- tmpReposes.zipWithIndex)
+      log(mTag, "fetchAndNotify(): tmpReposes(" + p._2 + ") = " +  stringFromRepository(p._1))
+    for(p <- tmpLastReposTimestampInfos)
       log(mTag, "fetchAndNotify(): LRTIs(" + stringFromRepository(p._1) + ") = " + stringFromRepositoryTimestampInfo(p._2))
-    for(p <- mOldReposTimestampInfos)
+    for(p <- tmpOldReposTimestampInfos)
       log(mTag, "fetchAndNotify(): ORTIs(" + stringFromRepository(p._1) + ") = " + stringFromRepositoryTimestampInfo(p._2))
     startThreadAndPost(mHandler, stopFlag) {
       () =>
@@ -69,7 +71,8 @@ class MainService extends Service
                 val res = dataFetcher.fetchIssueInfos(
                     repos, Some(tmpState), Some(tmpSorting), Some(Direction.Desc), since, 
                     Some(1), Some(2), Some(5000))
-                log(mTag, "fetchAndNotify(): fetched issues from " + stringFromRepository(repos) + res.fold(_ => "", issueInfo => " (issueInfoCount = " + issueInfo.size + ")"))
+                log(mTag, "fetchAndNotify(): fetched issues from " + stringFromRepository(repos) +
+                    res.fold(_ => "", issueInfo => " (issueInfoCount = " + issueInfo.size + ")"))
                 res
             }.getOrElse(Right(Vector())) match {
               case left @ Left(_)    => log(mTag, left); repos -> Vector()
@@ -90,15 +93,13 @@ class MainService extends Service
         val reposTimestampInfos = issueInfoLists.map {
           case (repos, issueInfos) => 
             val tmpCreatedIssueAt = tmpLastReposTimestampInfos.get(repos).map {
-              reposTimestampInfo =>
-                if(!tmpSortingByCreated) reposTimestampInfo.updatedIssueAt else reposTimestampInfo.createdIssueAt
+              reposTimestampInfo => reposTimestampInfo.createdIssueAt
             }.getOrElse(new Date(0))
             val createdIssueAt = issueInfos.foldLeft(tmpCreatedIssueAt) {
               case (date, issueInfo) => if(date.compareTo(issueInfo.createdAt) > 0) date else issueInfo.createdAt
             }
             val tmpUpdatedIssueAt = tmpLastReposTimestampInfos.get(repos).map {
-              reposTimestampInfo =>
-                if(!tmpSortingByCreated) reposTimestampInfo.updatedIssueAt else reposTimestampInfo.createdIssueAt
+              reposTimestampInfo => reposTimestampInfo.updatedIssueAt
             }.getOrElse(new Date(0))
             val updatedIssueAt = issueInfos.foldLeft(tmpUpdatedIssueAt) {
               case (date, issueInfo) => if(date.compareTo(issueInfo.updatedAt) > 0) date else issueInfo.updatedAt
@@ -132,7 +133,6 @@ class MainService extends Service
     mSettings = Settings(this)
     mReposes = log(mTag, loadRepositories(this)).fold(_ => Vector(), identity)
     mLastReposTimestampInfos = log(mTag, loadLastRepositoryTimestampInfos(this)).fold(_ => Map(), identity)
-    mOldReposTimestampInfos = log(mTag, loadOldRepositoryTimestampInfos(this)).fold(_ => Map(), identity)
     mStopFlag = StopFlag(false)
     log(mTag, "onStartCommand(): started")
     post(mHandler)(fetchAndNotify(mStopFlag))
@@ -145,13 +145,7 @@ class MainService extends Service
     mStopFlag.b = true
     mHandler.removeCallbacksAndMessages(null)
     log(mTag, "onDestroy(): stopped")
-  }
-  
-  private def stringFromRepository(repos: Repository) =
-    repos.server.name + ":" + repos.userName + "/" + repos.name
-  
-  private def stringFromRepositoryTimestampInfo(reposTimestampInfo: RepositoryTimestampInfo) =
-    "RTI(" + reposTimestampInfo.createdIssueAt + ", " + reposTimestampInfo.updatedIssueAt + ")"
+  }  
 }
 
 object MainService

@@ -8,6 +8,7 @@ package pl.luckboy.issuenotifier
 import java.net.URI
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.TimeZone
 import org.json.JSONArray
 import org.json.JSONObject
 import com.github.rjeschke.txtmark
@@ -37,7 +38,11 @@ class GitHubDataFetcher(val apiURI: String) extends DataFetcher
       case Direction.Desc => "desc"
     }
 
-  private val simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+  private val simpleDateFormat = {
+    val sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+    sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
+    sdf
+  }
   
   private def stringFromSince(since: Date) = simpleDateFormat.format(since)
   
@@ -48,9 +53,11 @@ class GitHubDataFetcher(val apiURI: String) extends DataFetcher
       case "all"    => State.All
     }
   
+  private val apiRequestHeaders = Map("Accept" -> "application/vnd.github.v3+json")
+  
   override def fetchIssue(repos: Repository, issueInfo: IssueInfo, timeout: Option[Int]): Either[Exception, Issue] = {
     val uri = apiURI + "/repos/" + encode(repos.userName) + "/" + encode(repos.name) + "/issues/" ++ encode(issueInfo.number.toString)
-    getJSONObject(new URI(uri), timeout) match {
+    getJSONObject(new URI(uri), timeout, apiRequestHeaders) match {
       case Left(e)           => Left(e)
       case Right(jsonObject) => issueFromJSONObject(jsonObject)
     }
@@ -88,7 +95,7 @@ class GitHubDataFetcher(val apiURI: String) extends DataFetcher
     		page.map { p => ("page" -> p.toString) }
     val paramMapStr = stringFromParams(paramMap)
     val uri = apiURI + "/repos/" + encode(repos.userName) + "/" + encode(repos.name) + "/issues" + (if(paramMapStr != "") "?" + paramMapStr else "")
-    getJSONArray(new URI(uri), timeout) match {
+    getJSONArray(new URI(uri), timeout, apiRequestHeaders) match {
       case Left(e)          => Left(e)
       case Right(jsonArray) =>
         (0 until jsonArray.length()).foldLeft(Right(Vector()): Either[Exception, Vector[IssueInfo]]) {
@@ -137,7 +144,7 @@ class GitHubDataFetcher(val apiURI: String) extends DataFetcher
     		page.map { p => ("page" -> p.toString) }
     val paramMapStr = stringFromParams(paramMap)
     val uri = apiURI + "/repos/" + encode(repos.userName) + "/" + encode(repos.name) + "/issues/" + encode(issueInfo.number.toString) + "/comments" + (if(paramMapStr != "") "?" + paramMapStr else "")
-    getJSONArray(new URI(uri), timeout) match {
+    getJSONArray(new URI(uri), timeout, apiRequestHeaders) match {
       case Left(e)          => Left(e)
       case Right(jsonArray) =>
         (0 until jsonArray.length()).foldLeft(Right(Vector()): Either[Exception, Vector[Comment]]) {

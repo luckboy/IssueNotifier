@@ -13,6 +13,7 @@ import scala.collection.mutable.PriorityQueue
 import scala.collection.mutable.{ Map => MutableMap }
 import AndroidUtils._
 import DataStorage._
+import LogStringUtils._
 
 class IssuePairListActivity extends AbstractIssueListActivity[IssuePair]
 {
@@ -28,6 +29,18 @@ class IssuePairListActivity extends AbstractIssueListActivity[IssuePair]
   private var mUnloadedIssuePairReposes: Set[Repository] = null
   private var mReposIssueCounts: Map[Repository, Long] = null
   
+  override def onCreate(bundle: Bundle)
+  {
+    super.onCreate(bundle)
+    log(mTag, "onCreated(): created")
+  }
+
+  override def onDestroy()
+  {
+    log(mTag, "onDestroy(): destroying ...")
+    super.onDestroy()
+  }
+    
   override protected val mRepositoryFromItem = (issuePair: IssuePair) => issuePair.repos
   
   override protected val mIssueInfoFromItem = (issuePair: IssuePair) => issuePair.issueInfo
@@ -47,9 +60,9 @@ class IssuePairListActivity extends AbstractIssueListActivity[IssuePair]
         val issuePairOrdering = new Ordering[IssuePair] {
           override def compare(issuePair1: IssuePair, issuePair2: IssuePair) =
             if(!mSortingByCreated)
-              -issuePair1.issueInfo.updatedAt.compareTo(issuePair1.issueInfo.updatedAt)
+              issuePair1.issueInfo.updatedAt.compareTo(issuePair2.issueInfo.updatedAt)
             else
-              -issuePair1.issueInfo.createdAt.compareTo(issuePair1.issueInfo.createdAt)
+              issuePair1.issueInfo.createdAt.compareTo(issuePair2.issueInfo.createdAt)
         }
         mIssuePairQueue = PriorityQueue()(issuePairOrdering)
         mUnloadedIssuePairReposes = mReposes.toSet
@@ -60,12 +73,23 @@ class IssuePairListActivity extends AbstractIssueListActivity[IssuePair]
   
   override protected def loadItems(f: (Vector[IssuePair], Boolean) => Unit)
   {
+    val tmpReposes = mReposes
     val tmpState = mState
     val tmpSorting = mSorting
     val tmpPage = mPage
     val tmpIssuePairQueue = mIssuePairQueue
     val tmpUnloadedIssuePairReposes = mUnloadedIssuePairReposes
     val tmpReposIssueCounts = mReposIssueCounts
+    log(mTag, "loadItems(): tmpState = " + tmpState)
+    log(mTag, "loadItems(): tmpSorting = " + tmpSorting)
+    log(mTag, "loadItems(): tmpPage = " + tmpPage)
+    for(p <- tmpReposes.zipWithIndex)
+      log(mTag, "loadItems(): tmpReposes(" + p._2 + ") = " + stringFromRepository(p._1))
+    log(mTag, "loadItems(): tmpIssuePairQueue.size = " + tmpIssuePairQueue.size)
+    for(p <- tmpUnloadedIssuePairReposes.zipWithIndex)
+      log(mTag, "loadItems(): tmpUnloadedIssuePairReposes(" + p._2 + ") = " + stringFromRepository(p._1))
+    for(p <- tmpReposIssueCounts)
+      log(mTag, "loadItems(): tmpReposIssueCounts(" + stringFromRepository(p._1) + ") = " + p._2)
     startThreadAndPost(mHandler, mStopFlag) {
       () =>
         val issueInfoLists = (Vector() ++ tmpUnloadedIssuePairReposes).flatMap {
@@ -73,9 +97,13 @@ class IssuePairListActivity extends AbstractIssueListActivity[IssuePair]
             if(tmpReposIssueCounts.getOrElse(repos, 0L) <= 0L)
               MainService.DataFetchers.get(repos.server).map {
                 dataFetcher =>
-                  dataFetcher.fetchIssueInfos(
+                  log(mTag, "loadItems(): fetching issues from " + stringFromRepository(repos) + " ...")
+                  val res = dataFetcher.fetchIssueInfos(
                       repos, Some(tmpState), Some(tmpSorting), Some(Direction.Desc), None, 
                       Some(tmpPage), Some(mPerPage), Some(30000))
+                  log(mTag, "loadItems(): fetched issues from " + stringFromRepository(repos) +
+                      res.fold(_ => "", issueInfo => " (issueInfoCount = " + issueInfo.size + ")"))
+                  res
               }.getOrElse(Right(Vector())) match {
                 case Left(e)           => Vector(repos -> Vector())
                 case Right(issueInfos) => Vector(repos -> issueInfos)
@@ -102,6 +130,13 @@ class IssuePairListActivity extends AbstractIssueListActivity[IssuePair]
         }
     } {
       case (issuePairs, issuePairQueue, unloadedIssuePairReposes, reposIssueCounts, areUnloadedItems) =>
+        log(mTag, "loadItems(): issuePairs.size = " + issuePairs.size)
+        log(mTag, "loadItems(): issuePairQueue.size = " + issuePairQueue.size)
+        for(p <- unloadedIssuePairReposes.zipWithIndex)
+          log(mTag, "loadItems(): unloadedIssuePairReposes(" + p._2 + ") = " + stringFromRepository(p._1))
+        for(p <- reposIssueCounts)
+          log(mTag, "loadItems(): reposIssueCounts(" + stringFromRepository(p._1) + ") = " + p._2)
+        log(mTag, "loadItems(): areUnloadedItems = " + areUnloadedItems)
         mPage += 1
         f(issuePairs, areUnloadedItems)
     }

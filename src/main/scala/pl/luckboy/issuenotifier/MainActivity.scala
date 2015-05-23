@@ -53,6 +53,9 @@ class MainActivity extends Activity with TypedActivity
     mReposListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       override def onItemClick(parent: AdapterView[_], view: View, position: Int, id: Long)
       {
+        val intent = new Intent(MainActivity.this, classOf[IssueListActivity])
+        intent.putExtra(IssueListActivity.ExtraRepos, mReposes.get(position).toJSONObject.toString)
+        MainActivity.this.startActivity(intent)
       }
     })
     mReposListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE)
@@ -205,6 +208,12 @@ object MainActivity
       if(convertView == null) {
         view = activity.getLayoutInflater().inflate(R.layout.repos_item, null)
         val textView = view.findViewById(R.id.reposItemTextView).asInstanceOf[TextView]
+        textView.setOnClickListener(new View.OnClickListener() {
+          override def onClick(view: View)
+          {
+            listView.performItemClick(convertView, position, getItemId(position)) 
+          }
+        })
         val checkBox = view.findViewById(R.id.reposItemCheckBox).asInstanceOf[CheckBox]
         view.setTag(RepositoryListAdapter.ViewHolder(textView, checkBox))
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

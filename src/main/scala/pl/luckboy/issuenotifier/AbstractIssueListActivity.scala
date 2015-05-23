@@ -36,6 +36,7 @@ abstract class AbstractIssueListActivity[T <: AnyRef] extends Activity with Type
   override def onCreate(bundle: Bundle)
   {
     super.onCreate(bundle)
+    log(mTag, "onCreated(): creating ...")
     setContentView(R.layout.issue_list)
     mHandler = new Handler()
     mItems = new ArrayList[T]()
@@ -66,6 +67,7 @@ abstract class AbstractIssueListActivity[T <: AnyRef] extends Activity with Type
   {
     mStopFlag.b = true
     mHandler.removeCallbacksAndMessages(null)
+    log(mTag, "onDestroy(): destroyed")
     super.onDestroy()
   }
   
@@ -77,7 +79,7 @@ abstract class AbstractIssueListActivity[T <: AnyRef] extends Activity with Type
         for(item <- loadedItems) mItems.add(item)
         mIssueListAdapter.unloadedItems = areUnloadedItems
         mIssueListAdapter.notifyDataSetChanged()
-        if(mIssueListView.getLastVisiblePosition() + 1 >= mItems.size())
+        if(areUnloadedItems && mIssueListView.getLastVisiblePosition() + 1 >= mItems.size())
           loadItemsAndUdateListView()
         else
           mCanLoad = true
@@ -123,7 +125,7 @@ object AbstractIssueListActivity
       if(position < items.size()) {
         val item = items.get(position)
         val issueInfo = g(item)
-        val stateStr = issueInfo match {
+        val stateStr = issueInfo.state match {
           case State.Open   => "!"
           case State.Closed => "\u2713"
           case State.All    => ""

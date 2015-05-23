@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="settings_screen_interval_values">
-        <item >30000</item>
-        <item >60000</item>
-        <item >120000</item>
-        <item >180000</item>
-        <item >300000</item>
-        <item >600000</item>
+        <item >1800000</item>
+        <item >3600000</item>
+        <item >7200000</item>
+        <item >10800000</item>
+        <item >18000000</item>
     </string-array>
     <string-array name="settings_screen_state_values">
         <item >0</item>

@@ -10,12 +10,11 @@
     <string name="main_menu_stop_title">Stop</string>
     <string name="main_menu_settings_title">Settings</string>
     <string-array name="settings_screen_intervals">
-        <item >30s</item>
-        <item >1min</item>
-        <item >2min</item>
-        <item >3min</item>
-        <item >5min</item>
-        <item >10min</item>
+        <item >30min</item>
+        <item >1h</item>
+        <item >2h</item>
+        <item >3h</item>
+        <item >5h</item>
     </string-array>
     <string-array name="settings_screen_states">
         <item >Open</item>
@@ -23,12 +22,13 @@
         <item >All</item>
     </string-array>
     <string name="settings_screen_interval_title">Interval</string>
-    <string name="settings_screen_state_title">State</string>
     <string name="settings_screen_interval_summary">Interval between fetching</string>
+    <string name="settings_screen_state_title">State</string>
     <string name="settings_screen_state_summary">State of fetching issues</string>
     <string name="settings_screen_sorting_by_created_title">Sorting by creation time</string>
     <string name="settings_screen_sorting_by_created_summary_on">Sorting by creation time</string>
     <string name="settings_screen_sorting_by_created_summary_off">Sorting by update time</string>
+    <string name="settings_screen_delete_timestamps_title">Delete timestamps</string>
     <plurals name="notification_issues_title">
         <item quantity="one">Issue!</item>
         <item quantity="other">Issues!</item>
@@ -48,5 +48,6 @@
         <item quantity="one">Do you want delete this repository?</item>
         <item quantity="other">Do you want delete these repositories?</item>
     </plurals>
-    
+    <string name="delete_timestamps_title">Delete timestamps</string>
+    <string name="delete_timestamps_message">Do you want delete timestamps?</string>
 </resources>

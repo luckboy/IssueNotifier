@@ -60,7 +60,7 @@ object AndroidUtils
     builder.setContentText(body)
     for(pendingIntent <- optPendingIntent) builder.setContentIntent(pendingIntent)
     val notification = builder.getNotification()
-    notification.flags |= (if(isAutoCancel) Notification.FLAG_AUTO_CANCEL else 0)
+    notification.flags |= (if(isAutoCancel) Notification.FLAG_AUTO_CANCEL else 0) | Notification.FLAG_NO_CLEAR 
     val nofificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
     nofificationManager.notify(0, notification)
   }

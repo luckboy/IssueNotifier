@@ -138,4 +138,13 @@ object DataStorage
 
   def storeOldRepositoryTimestampInfos(context: Context, infos: Map[Repository, RepositoryTimestampInfo]): Either[Exception, Unit] =
     storeRepositoryTimestampInfos(context, "ortis.json", infos)
+    
+  def loadPreviousOldRepositoryTimestampInfos(context: Context): Either[Exception, Map[Repository, RepositoryTimestampInfo]] =
+    loadRepositoryTimestampInfos(context, "portis.json")
+
+  def storePreviousOldRepositoryTimestampInfos(context: Context, infos: Map[Repository, RepositoryTimestampInfo]): Either[Exception, Unit] =
+    storeRepositoryTimestampInfos(context, "portis.json", infos)
+  
+  def clearAllRepositoryTimestampInfos(context: Context): Unit =
+    for(fn <- Array("lrtis.json", "ortis.json", "portis.json")) context.deleteFile(fn)
 }
