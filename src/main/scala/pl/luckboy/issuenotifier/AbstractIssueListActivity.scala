@@ -128,7 +128,6 @@ object AbstractIssueListActivity
         val stateStr = issueInfo.state match {
           case State.Open   => "!"
           case State.Closed => "\u2713"
-          case State.All    => ""
         }
     	viewHolder.stateTextView.setText(stateStr)
     	viewHolder.numberTextView.setText("#" + issueInfo.number)

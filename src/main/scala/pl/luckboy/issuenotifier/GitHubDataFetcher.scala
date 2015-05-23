@@ -18,11 +18,11 @@ class GitHubDataFetcher(val apiURI: String) extends DataFetcher
 {
   override val defaultPerPage = 10
   
-  private def stringFromState(state: State.Value) =
+  private def stringFromRequestIssueState(state: RequestIssueState) =
     state match {
-      case State.Open   => "open"
-      case State.Closed => "closed"
-      case State.All    => "all"
+      case IssueState(State.Open)   => "open"
+      case IssueState(State.Closed) => "closed"
+      case All                      => "all"
     }
   
   private def stringFromIssueSorting(sorting: IssueSorting.Value) =
@@ -50,7 +50,6 @@ class GitHubDataFetcher(val apiURI: String) extends DataFetcher
     s match {
       case "open"   => State.Open
       case "closed" => State.Closed
-      case "all"    => State.All
     }
   
   private val apiRequestHeaders = Map("Accept" -> "application/vnd.github.v3+json")
@@ -86,9 +85,9 @@ class GitHubDataFetcher(val apiURI: String) extends DataFetcher
     }
 
 
-  override def fetchIssueInfos(repos: Repository, state: Option[State.Value], sorting: Option[IssueSorting.Value], dir: Option[Direction.Value], since: Option[Date], page: Option[Long], perPage: Option[Long], timeout: Option[Int]): Either[Exception, Vector[IssueInfo]] = {
+  override def fetchIssueInfos(repos: Repository, state: Option[RequestIssueState], sorting: Option[IssueSorting.Value], dir: Option[Direction.Value], since: Option[Date], page: Option[Long], perPage: Option[Long], timeout: Option[Int]): Either[Exception, Vector[IssueInfo]] = {
     val paramMap = Map("per_page" -> perPage.getOrElse(defaultPerPage).toString) ++
-    		state.map { s => ("state" -> stringFromState(s)) } ++
+    		state.map { s => ("state" -> stringFromRequestIssueState(s)) } ++
     		sorting.map { s => ("sort" -> stringFromIssueSorting(s)) } ++
     		dir.map { d => ("direction" -> stringFromDirection(d)) } ++
     		since.map { s => ("since" -> stringFromSince(s)) } ++

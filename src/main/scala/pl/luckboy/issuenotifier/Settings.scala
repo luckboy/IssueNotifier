@@ -15,9 +15,9 @@ class Settings(preferences: SharedPreferences)
   
   def state =
     preferences.getString("settings_state", "0").toInt match {
-      case 1 => State.Closed 
-      case 2 => State.All
-      case _ => State.Open
+      case 1 => IssueState(State.Closed)
+      case 2 => All
+      case _ => IssueState(State.Open)
     }
   
   def sortingByCreated = preferences.getBoolean("settings_sorting_by_created", false)

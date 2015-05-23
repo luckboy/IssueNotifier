@@ -240,8 +240,19 @@ object State extends Enumeration
 {
   val Open = Value("open")
   val Closed = Value("closed")
-  val All = Value("all")
 }
+
+abstract class RequestIssueState
+{
+  override def toString =
+    this match {
+      case IssueState(state) => state.toString
+      case All               => "all"
+    }
+}
+
+case class IssueState(state: State.Value) extends RequestIssueState
+case object All extends RequestIssueState
 
 object IssueSorting extends Enumeration
 {

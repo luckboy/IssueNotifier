@@ -16,7 +16,7 @@ class IssueListActivity extends AbstractIssueListActivity[IssueInfo]
   override protected val mTag = getClass().getSimpleName()
   
   private var mRepos: Repository = null
-  private var mState: State.Value = null
+  private var mState: RequestIssueState = null
   private var mSorting: IssueSorting.Value = null
   private var mPage = 1L
 

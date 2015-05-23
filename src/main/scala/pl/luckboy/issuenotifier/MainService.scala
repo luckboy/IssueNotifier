@@ -114,6 +114,8 @@ class MainService extends Service
         mLastReposTimestampInfos = reposTimestampInfos
         for(p <- mLastReposTimestampInfos)
           log(mTag, "fetchAndNotify(): newLRTIs(" + stringFromRepository(p._1) + ") = " + stringFromRepositoryTimestampInfo(p._2))
+        log(mTag, "fetchAndNotify(): mustNotify = " + mustNotify)
+        log(mTag, "fetchAndNotify(): issueCount = " + issueCount)
         log(mTag, storeLastRepositoryTimestampInfos(this, mLastReposTimestampInfos))
         if(mustNotify) {
           val title = getResources().getQuantityString(R.plurals.notification_issues_title, issueCount)

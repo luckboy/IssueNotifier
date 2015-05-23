@@ -21,7 +21,7 @@ class IssuePairListActivity extends AbstractIssueListActivity[IssuePair]
   
   private var mIssueListTextView: TextView = null
   private var mReposes: Vector[Repository] = null
-  private var mState: State.Value = null
+  private var mState: RequestIssueState = null
   private var mSortingByCreated = false
   private var mSorting: IssueSorting.Value = null
   private var mPage = 1L
