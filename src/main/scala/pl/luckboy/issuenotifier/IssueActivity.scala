@@ -28,7 +28,7 @@ class IssueActivity extends Activity with TypedActivity
   private var mHandler: Handler = null
   private var mStopFlag: StopFlag = null
   private var mPage = 1L
-  private val mPerPage = 20
+  private val mPerPage = 2
   
   override def onCreate(bundle: Bundle)
   {
@@ -70,12 +70,11 @@ class IssueActivity extends Activity with TypedActivity
             val res = log(mTag, dataFetcher.fetchIssue(tmpRepos, tmpIssueInfo, Some(30000)))
             log(mTag, "onCreate(): fetched issue from " + stringFromRepository(tmpRepos))
             res.fold(e => Left(e), issue => Right(Some(issue)))
-        }.getOrElse(Right(None)) match {
-          case Left(_)      => None
-          case Right(optIssue) => optIssue 
-        }
+        }.getOrElse(Right(None))
     } {
-      case Some(issue) =>
+      case Left(_)            =>
+        showDialog(IssueActivity.DialogFetchingError)
+      case Right(Some(issue)) =>
         val stateStr = issue.info.state match {
           case State.Open   => "!"
           case State.Closed => "\u2713"
@@ -96,7 +95,7 @@ class IssueActivity extends Activity with TypedActivity
         mIssueWebView.loadDataWithBaseURL("file:///android_asset/", s, "text/html", "UTF-8", "")
         mCanLoad = true
         loadComments()
-      case None        => ()
+      case Right(None)        => ()
     }
   }
   
@@ -130,15 +129,14 @@ class IssueActivity extends Activity with TypedActivity
   
   private def loadComments()
   {
-    if(mCanLoad) {
-      log(mTag, "loadComments(): loading ...")
+    if(mCanLoad && mUnloadedCommentListFlag.flag) {
       mCanLoad = false
       val tmpRepos = mRepos
       val tmpIssueInfo = mIssueInfo
       val tmpPage = mPage
       startThreadAndPost(mHandler, mStopFlag) {
         () =>
-          val comments = MainService.DataFetchers.get(tmpRepos.server).map {
+          MainService.DataFetchers.get(tmpRepos.server).map {
             dataFetcher => 
               log(mTag, "loadComments(): fetching comments from " + stringFromRepositoryAndIssueInfo(tmpRepos, tmpIssueInfo) + " ...")
               val res = log(mTag, dataFetcher.fetchComments(
@@ -148,25 +146,40 @@ class IssueActivity extends Activity with TypedActivity
                   res.fold(_ => "", comments => " (commentCount = " + comments.size + ")"))
               res
           }.getOrElse(Right(Vector())) match {
-            case Left(e)         => Vector()
-            case Right(comments) => comments
+            case Left(e)         => Left(e)
+            case Right(comments) => 
+              Right(comments.map(htmlFromComment).mkString("\n"), comments.size >= mPerPage)
           }
-          (comments.map(htmlFromComment).mkString("\n"), comments.size >= mPerPage)
       } {
-        case (html, areUnloadedComments) =>
+        case Left(_)                            =>
+          showDialog(IssueActivity.DialogFetchingError)
+          mCommentListHtml.html = ""
+          mUnloadedCommentListFlag.flag = false
+          mCanLoad = true
+          mIssueWebView.loadUrl("javascript:onLoadComments()")
+        case Right((html, areUnloadedComments)) =>
           mPage += 1
           mCommentListHtml.html = html
           mUnloadedCommentListFlag.flag = areUnloadedComments
           mCanLoad = true
           mIssueWebView.loadUrl("javascript:onLoadComments()")
-          log(mTag, "loadComments(): loaded")
       }
     }
   }
+
+  override def onCreateDialog(id: Int, bundle: Bundle) =
+    id match {
+      case IssueActivity.DialogFetchingError =>
+        buildErrorDialog(this, getResources().getString(R.string.fetching_error_message))
+      case _                                         =>
+        super.onCreateDialog(id, bundle)
+    }
 }
 
 object IssueActivity
 {
+  private val DialogFetchingError = 0
+  
   val ExtraRepos = classOf[IssueActivity].getName() + ".Repos"
   val ExtraIssueInfo = classOf[IssueActivity].getName() + ".ExtraIssueInfo"
   

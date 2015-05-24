@@ -50,4 +50,7 @@
     </plurals>
     <string name="delete_timestamps_title">Delete timestamps</string>
     <string name="delete_timestamps_message">Do you want delete timestamps?</string>
+    <string name="error_title">Error</string>
+    <string name="fetching_error_message">Can\'t fetch data from server.</string>
+    <string name="io_error_message">I/O error.</string>
 </resources>

@@ -10,6 +10,7 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.preference.Preference
 import android.preference.PreferenceActivity
+import AndroidUtils._
 import DataStorage._
 
 class SettingsActivity extends PreferenceActivity with TypedActivity
@@ -33,27 +34,17 @@ class SettingsActivity extends PreferenceActivity with TypedActivity
     })
   }
 
-  override def onCreateDialog(id: Int, bundle: Bundle) = {
+  override def onCreateDialog(id: Int, bundle: Bundle) =
     id match {
       case SettingsActivity.DialogDeleteTimestamps =>
-        val builder = new AlertDialog.Builder(this)
-        builder.setTitle(getResources().getString(R.string.delete_timestamps_title))
-        builder.setMessage(getResources().getString(R.string.delete_timestamps_message))
-        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-          override def onClick(dialog: DialogInterface, id: Int)
-          {
-        	clearAllRepositoryTimestampInfos(SettingsActivity.this)
-          }
-        })
-        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-          override def onClick(dialog: DialogInterface, id: Int)
-          {
-          }
-        })
-        builder.create()
-        
+        val title = getResources().getString(R.string.delete_timestamps_title)
+        val msg = getResources().getString(R.string.delete_timestamps_message)
+        buildQuestionDialog(this, title, msg, true) {
+          () => clearAllRepositoryTimestampInfos(SettingsActivity.this)
+        }
+      case _                                       =>
+        super.onCreateDialog(id, bundle)
     }
-  }
 }
 
 object SettingsActivity

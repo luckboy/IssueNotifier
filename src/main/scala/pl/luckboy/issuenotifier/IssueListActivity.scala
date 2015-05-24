@@ -73,19 +73,29 @@ class IssueListActivity extends AbstractIssueListActivity[IssueInfo]
             log(mTag, "loadItems(): fetched issues from " + stringFromRepository(tmpRepos) +
                 res.fold(_ => "", issueInfos => " (issueInfoCount = " + issueInfos.size + ")"))
             res
-        }.getOrElse(Right(Vector())) match {
-          case Left(e)           => Vector()
-          case Right(issueInfos) => issueInfos
-        }
+        }.getOrElse(Right(Vector()))
     } {
-      issueInfos =>
+      case Left(e)           =>
+        showDialog(IssueListActivity.DialogFetchingError)
+        f(Vector(), false)
+      case Right(issueInfos) =>
         mPage += 1
         f(issueInfos, issueInfos.size >= mPerPage)
     }
   }
+  
+  override def onCreateDialog(id: Int, bundle: Bundle) =
+    id match {
+      case IssueListActivity.DialogFetchingError =>
+        buildErrorDialog(this, getResources().getString(R.string.fetching_error_message))
+      case _                                     =>
+        super.onCreateDialog(id, bundle)
+    }
 }
 
 object IssueListActivity
 {
+  private val DialogFetchingError = 0
+  
   val ExtraRepos = classOf[IssueListActivity].getName() + ".ExtraRepos"
 }

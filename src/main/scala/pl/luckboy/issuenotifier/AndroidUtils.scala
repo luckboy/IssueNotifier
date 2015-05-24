@@ -13,6 +13,8 @@ import android.os.Handler
 import android.text.Html
 import android.text.SpannedString
 import android.util.Log
+import android.app.AlertDialog
+import android.content.DialogInterface
 
 object AndroidUtils
 {
@@ -52,6 +54,31 @@ object AndroidUtils
         f()
       }
     }, millis)
+  }
+  
+  def buildQuestionDialog(context: Context, title: String, msg: String, isWarning: Boolean = false)(f: () => Unit) ={
+    val builder = new AlertDialog.Builder(context)
+    if(isWarning) builder.setIcon(android.R.drawable.ic_dialog_alert)
+    builder.setTitle(title)
+    builder.setMessage(msg)
+    builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+      override def onClick(dialog: DialogInterface, id: Int) = f()
+    })
+    builder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+      override def onClick(dialog: DialogInterface, id: Int) = ()
+    })
+    builder.create()
+  }
+  
+  def buildErrorDialog(context: Context, msg: String) = {
+    val builder = new AlertDialog.Builder(context)
+    builder.setIcon(android.R.drawable.ic_dialog_alert)
+    builder.setTitle(R.string.error_title)
+    builder.setMessage(msg)
+    builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+      override def onClick(dialog: DialogInterface, id: Int) = ()
+    })
+    builder.create()
   }
   
   def notify(context: Context, smallIconId: Int, title: String, body: String, optPendingIntent: Option[PendingIntent], isAutoCancel: Boolean)

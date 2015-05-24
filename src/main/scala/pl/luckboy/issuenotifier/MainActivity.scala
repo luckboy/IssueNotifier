@@ -71,7 +71,7 @@ class MainActivity extends Activity with TypedActivity
     }
   }
   
-  override def onCreateDialog(id: Int, bundle: Bundle) = {
+  override def onCreateDialog(id: Int, bundle: Bundle) =
     id match {
       case MainActivity.DialogAddRepos       =>
         val builder = new AlertDialog.Builder(this)
@@ -97,12 +97,10 @@ class MainActivity extends Activity with TypedActivity
         builder.create()
       case MainActivity.DialogDeleteReposes =>
         val checkedItemCount = mReposListView.getCheckedItemCount()
-        val builder = new AlertDialog.Builder(this)
-        builder.setTitle(getResources().getQuantityString(R.plurals.delete_reposes_title, checkedItemCount))
-        builder.setMessage(getResources().getQuantityString(R.plurals.delete_reposes_title, checkedItemCount))
-        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-          override def onClick(dialog: DialogInterface, id: Int)
-          {
+        val title = getResources().getQuantityString(R.plurals.delete_reposes_title, checkedItemCount)
+        val msg = getResources().getQuantityString(R.plurals.delete_reposes_title, checkedItemCount)
+        buildQuestionDialog(this, title, msg, true) {
+          () =>
             val checkedItems = mReposListView.getCheckedItemPositions()
             val reposIndexes = BitSet() ++ (0 until checkedItems.size()).flatMap {
               i =>
@@ -111,18 +109,12 @@ class MainActivity extends Activity with TypedActivity
             }
             mReposListView.clearChoices()
             deleteRepositories(reposIndexes)
-          }
-        })
-        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-          override def onClick(dialog: DialogInterface, id: Int)
-          {
-          }
-        })
-        builder.create()
+        }
+      case MainActivity.DialogIOError       =>
+        buildErrorDialog(this, getResources().getString(R.string.io_error_message))
       case _                                =>
         super.onCreateDialog(id, bundle)
     }
-  }
   
   override def onPrepareDialog(id: Int, dialog: Dialog, bundle: Bundle)
   {
@@ -181,15 +173,21 @@ class MainActivity extends Activity with TypedActivity
   private def addRepository(repos: Repository)
   {
     mReposes.add(repos)
-    log(mTag, storeRepositories(this, vectorFromList(mReposes)))
     mReposListAdapter.notifyDataSetChanged()
+    log(mTag, storeRepositories(this, vectorFromList(mReposes))) match {
+      case Left(_) => showDialog(MainActivity.DialogIOError)
+      case _       => ()
+    }
   }
   
   private def deleteRepositories(reposIndexes: BitSet)
   {
     for(i <- reposIndexes) mReposes.remove(i)
-    log(mTag, storeRepositories(this, vectorFromList(mReposes)))
     mReposListAdapter.notifyDataSetChanged()
+    log(mTag, storeRepositories(this, vectorFromList(mReposes))) match {
+      case Left(_) => showDialog(MainActivity.DialogIOError)
+      case _       => ()
+    }
   }
   
   private def vectorFromList[T](xs: List[T]) = (0 until xs.size()).foldLeft(Vector[T]()) { (ys, i) => ys :+ xs.get(i) }  
@@ -199,6 +197,7 @@ object MainActivity
 {
   private val DialogAddRepos = 0
   private val DialogDeleteReposes = 1
+  private val DialogIOError = 2
   
   private class RepositoryListAdapter(activity: Activity, reposes: ArrayList[Repository]) extends ArrayAdapter[Repository](activity, R.layout.repos_item, reposes)
   { 

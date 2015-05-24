@@ -49,7 +49,8 @@ class IssuePairListActivity extends AbstractIssueListActivity[IssuePair]
     mIssueListTextView = findView(TR.issueListTextView)
     mIssueListTextView.setText(getResources().getString(R.string.issue_list_issues_from_all_reposes))
     loadRepositories(this) match {
-      case Left(e)        => false
+      case Left(e)        => 
+        false
       case Right(reposes) =>
         mReposes = reposes
         val settings = Settings(this)
@@ -92,44 +93,52 @@ class IssuePairListActivity extends AbstractIssueListActivity[IssuePair]
       log(mTag, "loadItems(): tmpReposIssueCounts(" + stringFromRepository(p._1) + ") = " + p._2)
     startThreadAndPost(mHandler, mStopFlag) {
       () =>
-        val issueInfoLists = (Vector() ++ tmpUnloadedIssuePairReposes).flatMap {
-          repos =>
+        (Vector() ++ tmpUnloadedIssuePairReposes).foldLeft(Right(Vector()): Either[Exception, Vector[(Repository, Vector[IssueInfo])]]) {
+          case (left @ Left(_), _)            => left
+          case (Right(issueInfoLists), repos) =>
             if(tmpReposIssueCounts.getOrElse(repos, 0L) <= 0L)
               MainService.DataFetchers.get(repos.server).map {
                 dataFetcher =>
                   log(mTag, "loadItems(): fetching issues from " + stringFromRepository(repos) + " ...")
-                  val res = dataFetcher.fetchIssueInfos(
+                  val res = log(mTag, dataFetcher.fetchIssueInfos(
                       repos, Some(tmpState), Some(tmpSorting), Some(Direction.Desc), None, 
-                      Some(tmpPage), Some(mPerPage), Some(30000))
+                      Some(tmpPage), Some(mPerPage), Some(30000)))
                   log(mTag, "loadItems(): fetched issues from " + stringFromRepository(repos) +
                       res.fold(_ => "", issueInfos => " (issueInfoCount = " + issueInfos.size + ")"))
                   res
               }.getOrElse(Right(Vector())) match {
-                case Left(e)           => Vector(repos -> Vector())
-                case Right(issueInfos) => Vector(repos -> issueInfos)
+                case Left(e) => Left(e)
+                case Right(issueInfos) => Right(issueInfoLists :+ (repos -> issueInfos))
               }
             else
-              Vector()
-        }
-        tmpIssuePairQueue ++= issueInfoLists.flatMap {
-          case (repos, issueInfos) => issueInfos.map { issueInfo => IssuePair(repos, issueInfo) }
-        }
-        val unloadedIssuePairReposes = issueInfoLists.flatMap {
-          case (repos, issueInfos) => if(issueInfos.size >= mPerPage) Vector(repos) else Vector()
-        }.toSet
-        val tmpReposIssueCounts2 = issueInfoLists.map { 
-          case (repos, issueInfos) => repos -> issueInfos.size
-        }.toMap
-        val tmpReposIssueCounts3 = tmpReposIssueCounts.map {
-          case (repos, issueCount) => repos -> (issueCount + tmpReposIssueCounts2.getOrElse(repos, 0))
-        }
-        dequeueIssuePairQueue(tmpIssuePairQueue, unloadedIssuePairReposes, Vector(), MutableMap() ++ tmpReposIssueCounts3) match {
-          case (issuePairs, issuePairQueue, reposIssueCounts) =>
-            val areUnloadedItems = !unloadedIssuePairReposes.isEmpty
-            (issuePairs, issuePairQueue, unloadedIssuePairReposes, reposIssueCounts.toMap, areUnloadedItems)
+              Right(Vector())
+        } match {
+          case Left(e)               => Left(e)
+          case Right(issueInfoLists) =>
+            tmpIssuePairQueue ++= issueInfoLists.flatMap {
+              case (repos, issueInfos) => issueInfos.map { issueInfo => IssuePair(repos, issueInfo) }
+            }
+            val unloadedIssuePairReposes = issueInfoLists.flatMap {
+              case (repos, issueInfos) => if(issueInfos.size >= mPerPage) Vector(repos) else Vector()
+            }.toSet
+            val tmpReposIssueCounts2 = issueInfoLists.map { 
+              case (repos, issueInfos) => repos -> issueInfos.size
+            }.toMap
+            val tmpReposIssueCounts3 = tmpReposIssueCounts.map {
+              case (repos, issueCount) => repos -> (issueCount + tmpReposIssueCounts2.getOrElse(repos, 0))
+            }
+            dequeueIssuePairQueue(tmpIssuePairQueue, unloadedIssuePairReposes, Vector(), MutableMap() ++ tmpReposIssueCounts3) match {
+              case (issuePairs, issuePairQueue, reposIssueCounts) =>
+                val areUnloadedItems = !unloadedIssuePairReposes.isEmpty
+                Right((issuePairs, issuePairQueue, unloadedIssuePairReposes, reposIssueCounts.toMap, areUnloadedItems))
+            }
         }
     } {
-      case (issuePairs, issuePairQueue, unloadedIssuePairReposes, reposIssueCounts, areUnloadedItems) =>
+      case Left(_)      =>
+        showDialog(IssuePairListActivity.DialogFetchingError)
+        f(Vector(), false)
+      case Right(tuple) =>
+        val (issuePairs, issuePairQueue, unloadedIssuePairReposes, reposIssueCounts, areUnloadedItems) = tuple
         log(mTag, "loadItems(): issuePairs.size = " + issuePairs.size)
         log(mTag, "loadItems(): issuePairQueue.size = " + issuePairQueue.size)
         for(p <- unloadedIssuePairReposes.zipWithIndex)
@@ -156,4 +165,20 @@ class IssuePairListActivity extends AbstractIssueListActivity[IssuePair]
       else
         (newIssuePairs, queue, reposIssueCounts)
     }
+
+  override def onCreateDialog(id: Int, bundle: Bundle) =
+    id match {
+      case IssuePairListActivity.DialogFetchingError =>
+        buildErrorDialog(this, getResources().getString(R.string.fetching_error_message))
+      case IssuePairListActivity.DialogIOError       =>
+        buildErrorDialog(this, getResources().getString(R.string.io_error_message))
+      case _                                         =>
+        super.onCreateDialog(id, bundle)
+    }
+}
+
+object IssuePairListActivity
+{
+  private val DialogFetchingError = 0
+  private val DialogIOError = 1
 }
