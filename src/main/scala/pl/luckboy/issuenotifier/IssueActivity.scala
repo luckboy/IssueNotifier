@@ -95,6 +95,7 @@ class IssueActivity extends Activity with TypedActivity
             "</html>")
         mIssueWebView.loadDataWithBaseURL("file:///android_asset/", s, "text/html", "UTF-8", "")
         mCanLoad = true
+        loadComments()
       case None        => ()
     }
   }
@@ -141,7 +142,7 @@ class IssueActivity extends Activity with TypedActivity
             dataFetcher => 
               log(mTag, "loadComments(): fetching comments from " + stringFromRepositoryAndIssueInfo(tmpRepos, tmpIssueInfo) + " ...")
               val res = log(mTag, dataFetcher.fetchComments(
-                  tmpRepos, tmpIssueInfo, Some(CommentSorting.Created), Some(Direction.Desc), None,
+                  tmpRepos, tmpIssueInfo, Some(CommentSorting.Created), Some(Direction.Asc), None,
                   Some(tmpPage), Some(mPerPage), Some(30000)))
               log(mTag, "loadComments(): fetched comments from " +  stringFromRepositoryAndIssueInfo(tmpRepos, tmpIssueInfo) +
                   res.fold(_ => "", comments => " (commentCount = " + comments.size + ")"))
@@ -190,5 +191,7 @@ object IssueActivity
     def getCommentListHtml(): String = commentListHtml.html
     
     def areUnloadedComments(): Boolean = unloadedCommentListFlag.flag
+    
+    //def log(s: String): Unit = AndroidUtils.log("IssueActivity.JSObject", s)
   }
 }

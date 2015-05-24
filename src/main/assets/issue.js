@@ -9,7 +9,9 @@ function mustLoadComments()
 {
 	var scrollBottom = window.pageYOffset + window.innerHeight;
 	var loadingElem = document.getElementById("loading");
-	var loadingElemAbsOffsetTop = loadingElem.offsetTop;
+	var loadingElemAbsOffsetTop = loadingElem.offsetTop || Infinity;
+	//IssueNotifierObject.log("scrollBottom = " + scrollBottom);
+	//IssueNotifierObject.log("loadingElemAbsOffsetTop = " + loadingElemAbsOffsetTop);
 	return IssueNotifierObject.areUnloadedComments() && scrollBottom > loadingElemAbsOffsetTop;
 }
 
@@ -23,8 +25,8 @@ function onLoadComments()
 	var commentListElem = document.getElementById("comments");
 	var commentListHtml = IssueNotifierObject.getCommentListHtml();
 	commentListElem.innerHTML += commentListHtml;
-	if(mustLoadComments())
-		IssueNotifierObject.loadComments();
-	else
-		document.getElementById("loading").style.display = "none";
+	var areUnloadedComments = IssueNotifierObject.areUnloadedComments();
+	//IssueNotifierObject.log("areUnloadedComments = " + areUnloadedComments);
+	if(!areUnloadedComments) document.getElementById("loading").style.display = "none";
+	if(mustLoadComments()) IssueNotifierObject.loadComments();
 }
