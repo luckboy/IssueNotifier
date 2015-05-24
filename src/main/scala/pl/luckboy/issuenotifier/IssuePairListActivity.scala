@@ -102,7 +102,7 @@ class IssuePairListActivity extends AbstractIssueListActivity[IssuePair]
                       repos, Some(tmpState), Some(tmpSorting), Some(Direction.Desc), None, 
                       Some(tmpPage), Some(mPerPage), Some(30000))
                   log(mTag, "loadItems(): fetched issues from " + stringFromRepository(repos) +
-                      res.fold(_ => "", issueInfo => " (issueInfoCount = " + issueInfo.size + ")"))
+                      res.fold(_ => "", issueInfos => " (issueInfoCount = " + issueInfos.size + ")"))
                   res
               }.getOrElse(Right(Vector())) match {
                 case Left(e)           => Vector(repos -> Vector())

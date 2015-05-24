@@ -72,7 +72,7 @@ class MainService extends Service
                     repos, Some(tmpState), Some(tmpSorting), Some(Direction.Desc), since, 
                     Some(1), Some(2), Some(5000))
                 log(mTag, "fetchAndNotify(): fetched issues from " + stringFromRepository(repos) +
-                    res.fold(_ => "", issueInfo => " (issueInfoCount = " + issueInfo.size + ")"))
+                    res.fold(_ => "", issueInfos => " (issueInfoCount = " + issueInfos.size + ")"))
                 res
             }.getOrElse(Right(Vector())) match {
               case left @ Left(_)    => log(mTag, left); repos -> Vector()
