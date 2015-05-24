@@ -11,6 +11,9 @@ object LogStringUtils
   def stringFromRepository(repos: Repository) =
     repos.server.name + ":" + repos.userName + "/" + repos.name
   
+  def stringFromRepositoryAndIssueInfo(repos: Repository, issueInfo: IssueInfo) =
+    stringFromRepository(repos) + "/" + issueInfo.number
+  
   def stringFromRepositoryTimestampInfo(reposTimestampInfo: RepositoryTimestampInfo) =
     "RTI(" + reposTimestampInfo.createdIssueAt + ", " + reposTimestampInfo.updatedIssueAt + ")"
 }

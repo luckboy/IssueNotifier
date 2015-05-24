@@ -38,7 +38,7 @@ class IssueListActivity extends AbstractIssueListActivity[IssueInfo]
   
   override protected def initialize() =
     try {
-      Repository.fromJSONObject(new JSONObject(getIntent().getStringExtra(IssueListActivity.ExtraRepos))) match {
+      log(mTag, Repository.fromJSONObject(new JSONObject(getIntent().getStringExtra(IssueListActivity.ExtraRepos)))) match {
         case Left(e)      => false
         case Right(repos) =>
           mRepos = repos
@@ -64,17 +64,16 @@ class IssueListActivity extends AbstractIssueListActivity[IssueInfo]
     log(mTag, "loadItems(): tmpRepos = " + stringFromRepository(tmpRepos))
     startThreadAndPost(mHandler, mStopFlag) {
       () =>
-        val res = MainService.DataFetchers.get(tmpRepos.server).map {
+        MainService.DataFetchers.get(tmpRepos.server).map {
           dataFetcher => 
             log(mTag, "loadItems(): fetching issues from " + stringFromRepository(tmpRepos) + " ...")
             val res = log(mTag, dataFetcher.fetchIssueInfos(
                 tmpRepos, Some(tmpState), Some(tmpSorting), Some(Direction.Desc), None,
                 Some(tmpPage), Some(mPerPage), Some(30000)))
             log(mTag, "loadItems(): fetched issues from " + stringFromRepository(tmpRepos) +
-                res.fold(_ => "", issueInfo => " (issueInfoCount = " + issueInfo.size + ")"))
+                res.fold(_ => "", issueInfos => " (issueInfoCount = " + issueInfos.size + ")"))
             res
-        }.getOrElse(Right(Vector()))
-        res match {
+        }.getOrElse(Right(Vector())) match {
           case Left(e)           => Vector()
           case Right(issueInfos) => issueInfos
         }
@@ -88,5 +87,5 @@ class IssueListActivity extends AbstractIssueListActivity[IssueInfo]
 
 object IssueListActivity
 {
-  val ExtraRepos = classOf[MainReceiver].getName() + ".ExtraRepos"
+  val ExtraRepos = classOf[IssueListActivity].getName() + ".ExtraRepos"
 }

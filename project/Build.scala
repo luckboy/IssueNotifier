@@ -19,6 +19,7 @@ object Build extends Build
               platformName in Android := "android-11",
               useProguard in Android := true,
               libraryDependencies += "com.github.rjeschke" % "txtmark" % "0.13",
+              libraryDependencies += "org.jsoup" % "jsoup" % "1.8.2",
               javaOptions ++= Seq("-source", "1.6"),
               javaOptions ++= Seq("-target", "1.6"))))
 }

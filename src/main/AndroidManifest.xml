@@ -18,5 +18,6 @@
         </receiver>
         <activity android:name="IssuePairListActivity"></activity>
         <activity android:name="IssueListActivity"></activity>
+        <activity android:name="IssueActivity"></activity>
     </application>
 </manifest>

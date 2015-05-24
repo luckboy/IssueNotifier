@@ -10,6 +10,8 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.os.Handler
+import android.text.Html
+import android.text.SpannedString
 import android.util.Log
 
 object AndroidUtils
@@ -72,4 +74,6 @@ object AndroidUtils
       case Left(e) => Log.w(tag, e); res
       case _       => res
     }
+  
+  def htmlFromString(s: String) = Html.toHtml(new SpannedString(s))
 }

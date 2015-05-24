@@ -20,6 +20,7 @@ import android.widget.TextView
 import java.text.SimpleDateFormat
 import java.util.ArrayList
 import AndroidUtils._
+import android.content.Intent
 
 abstract class AbstractIssueListActivity[T <: AnyRef] extends Activity with TypedActivity
 {
@@ -47,6 +48,11 @@ abstract class AbstractIssueListActivity[T <: AnyRef] extends Activity with Type
     mIssueListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       override def onItemClick(parent: AdapterView[_], view: View, position: Int, id: Long)
       {
+        val intent = new Intent(AbstractIssueListActivity.this, classOf[IssueActivity])
+        val item = mItems.get(position)
+        intent.putExtra(IssueActivity.ExtraRepos, mRepositoryFromItem(item).toJSONObject.toString)
+        intent.putExtra(IssueActivity.ExtraIssueInfo, mIssueInfoFromItem(item).toJSONObject.toString)
+        AbstractIssueListActivity.this.startActivity(intent)
       }
     })
     mStopFlag = StopFlag(false)
@@ -120,6 +126,12 @@ object AbstractIssueListActivity
         val dateTextView = view.findViewById(R.id.issueItemDateTextView).asInstanceOf[TextView]
         val progressBar = view.findViewById(R.id.issueItemProgressBar).asInstanceOf[ProgressBar]
         view.setTag(IssueListAdapter.ViewHolder(layout, stateTextView, numberTextView, titleTextView, reposTextView, dateTextView, progressBar))
+    	view.setOnClickListener(new View.OnClickListener() {
+          override def onClick(view: View)
+          {
+            if(position < items.size()) listView.performItemClick(convertView, position, getItemId(position)) 
+          }
+        })
       }
       val viewHolder = view.getTag().asInstanceOf[IssueListAdapter.ViewHolder]
       if(position < items.size()) {

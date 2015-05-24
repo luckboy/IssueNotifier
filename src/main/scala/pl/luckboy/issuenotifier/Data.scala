@@ -90,7 +90,7 @@ case class IssueInfo(
     jsonObject.put("user", user.toJSONObject)
     for(date <- closedAt) jsonObject.put("closedAt", sdf.format(date))
     jsonObject.put("createdAt", sdf.format(createdAt))
-    jsonObject.put("updatedAt", sdf.format())
+    jsonObject.put("updatedAt", sdf.format(updatedAt))
   }
 }
 
@@ -110,7 +110,7 @@ object IssueInfo
           val closedAtStr = jsonObject.optString("closedAt")
           val createdAtStr = jsonObject.getString("createdAt")
           val updatedAtStr = jsonObject.getString("updatedAt")
-          val closedAt = if(closedAtStr != null) Some(sdf.parse(closedAtStr)) else None
+          val closedAt = if(closedAtStr != "") Some(sdf.parse(closedAtStr)) else None
           val createdAt = sdf.parse(createdAtStr)
           val updatedAt = sdf.parse(updatedAtStr)
           Right(IssueInfo(id, number, state, title, commentCount, user, closedAt, createdAt, updatedAt))

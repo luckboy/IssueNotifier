@@ -12,6 +12,8 @@ import java.util.TimeZone
 import org.json.JSONArray
 import org.json.JSONObject
 import com.github.rjeschke.txtmark
+import org.jsoup.Jsoup
+import org.jsoup.safety.Whitelist
 import HttpUtils._
 
 class GitHubDataFetcher(val apiURI: String) extends DataFetcher
@@ -54,6 +56,8 @@ class GitHubDataFetcher(val apiURI: String) extends DataFetcher
   
   private val apiRequestHeaders = Map("Accept" -> "application/vnd.github.v3+json")
   
+  private val whitelist = Whitelist.basic()
+  
   override def fetchIssue(repos: Repository, issueInfo: IssueInfo, timeout: Option[Int]): Either[Exception, Issue] = {
     val uri = apiURI + "/repos/" + encode(repos.userName) + "/" + encode(repos.name) + "/issues/" ++ encode(issueInfo.number.toString)
     getJSONObject(new URI(uri), timeout, apiRequestHeaders) match {
@@ -67,7 +71,7 @@ class GitHubDataFetcher(val apiURI: String) extends DataFetcher
       issueInfoFromJSONObject(jsonObject : JSONObject) match {
         case Left(e)          => Left(e)
         case Right(issueInfo) =>
-          val bodyHtml = txtmark.Processor.process(jsonObject.getString("body"))
+          val bodyHtml = Jsoup.clean(txtmark.Processor.process(jsonObject.getString("body")), whitelist)
           Right(Issue(issueInfo, bodyHtml))
       }
     } catch {
@@ -160,7 +164,7 @@ class GitHubDataFetcher(val apiURI: String) extends DataFetcher
   private def commentFromJSONObject(jsonObject: JSONObject) =
     try {
       val id = jsonObject.getLong("id").toString
-      val bodyHtml = txtmark.Processor.process(jsonObject.getString("body"))
+      val bodyHtml = Jsoup.clean(txtmark.Processor.process(jsonObject.getString("body")), whitelist)
       val createdAtStr = jsonObject.getString("created_at")
       val updatedAtStr = jsonObject.getString("updated_at")
       val createdAt = simpleDateFormat.parse(createdAtStr)
