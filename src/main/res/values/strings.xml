@@ -6,6 +6,10 @@
     <string name="issue_list_issues_from_all_reposes">Issues from all repositories:</string>
     <string name="main_menu_add_repos_title">Add repository</string>
     <string name="main_menu_delete_reposes_title">Delete repository(ies)</string>
+    <plurals name="main_menu_delete_reposes_title">
+        <item quantity="one">Delete repository</item>
+        <item quantity="other">Delete repositories</item>
+    </plurals>
     <string name="main_menu_start_title">Start</string>
     <string name="main_menu_stop_title">Stop</string>
     <string name="main_menu_settings_title">Settings</string>
@@ -38,19 +42,22 @@
         <item quantity="other">You have issues!</item>
     </plurals>
     <string name="add_repos_user_name">User name:</string>
-    <string name="add_repos_name">Name:</string>
+    <string name="add_repos_name">Repository name:</string>
     <string name="add_repos_title">Add repository</string>
     <plurals name="delete_reposes_title">
         <item quantity="one">Delete repository</item>
         <item quantity="other">Delete repositories</item>
     </plurals>
     <plurals name="delete_reposes_message">
-        <item quantity="one">Do you want delete this repository?</item>
-        <item quantity="other">Do you want delete these repositories?</item>
+        <item quantity="one">Do you want delete checked repository?</item>
+        <item quantity="other">Do you want delete checked repositories?</item>
     </plurals>
     <string name="delete_timestamps_title">Delete timestamps</string>
     <string name="delete_timestamps_message">Do you want delete timestamps?</string>
     <string name="error_title">Error</string>
     <string name="fetching_error_message">Can\'t fetch data from server.</string>
     <string name="io_error_message">I/O error.</string>
+    <string name="incorrect_user_name_error_message">Incorrect user name.</string>
+    <string name="incorrect_repos_name_error_message">Incorrect repository name.</string>
+    <string name="existent_repos_error_message">Repository already exists.</string>
 </resources>
