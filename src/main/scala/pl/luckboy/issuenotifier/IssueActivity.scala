@@ -170,7 +170,7 @@ class IssueActivity extends Activity with TypedActivity
   override def onCreateDialog(id: Int, bundle: Bundle) =
     id match {
       case IssueActivity.DialogFetchingError =>
-        buildErrorDialog(this, getResources().getString(R.string.fetching_error_message))
+        createErrorDialog(this, getResources().getString(R.string.fetching_error_message))
       case _                                         =>
         super.onCreateDialog(id, bundle)
     }

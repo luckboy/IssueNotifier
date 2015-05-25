@@ -56,7 +56,7 @@ object AndroidUtils
     }, millis)
   }
   
-  def buildQuestionDialog(context: Context, title: String, msg: String, isWarning: Boolean = false)(f: () => Unit) ={
+  def createQuestionDialog(context: Context, title: String, msg: String, isWarning: Boolean = false)(f: () => Unit) ={
     val builder = new AlertDialog.Builder(context)
     if(isWarning) builder.setIcon(android.R.drawable.ic_dialog_alert)
     builder.setTitle(title)
@@ -70,7 +70,7 @@ object AndroidUtils
     builder.create()
   }
   
-  def buildErrorDialog(context: Context, msg: String) = {
+  def createErrorDialog(context: Context, msg: String) = {
     val builder = new AlertDialog.Builder(context)
     builder.setIcon(android.R.drawable.ic_dialog_alert)
     builder.setTitle(R.string.error_title)

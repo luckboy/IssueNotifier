@@ -39,7 +39,7 @@ class SettingsActivity extends PreferenceActivity with TypedActivity
       case SettingsActivity.DialogDeleteTimestamps =>
         val title = getResources().getString(R.string.delete_timestamps_title)
         val msg = getResources().getString(R.string.delete_timestamps_message)
-        buildQuestionDialog(this, title, msg, true) {
+        createQuestionDialog(this, title, msg, true) {
           () => clearAllRepositoryTimestampInfos(SettingsActivity.this)
         }
       case _                                       =>

@@ -100,7 +100,7 @@ class MainActivity extends Activity with TypedActivity
         val checkedItemCount = mReposListView.getCheckedItemCount()
         val title = getResources().getQuantityString(R.plurals.delete_reposes_title, checkedItemCount)
         val msg = getResources().getQuantityString(R.plurals.delete_reposes_message, checkedItemCount)
-        buildQuestionDialog(this, title, msg, true) {
+        createQuestionDialog(this, title, msg, true) {
           () =>
             val checkedItems = mReposListView.getCheckedItemPositions()
             val reposIndexes = BitSet() ++ (0 until checkedItems.size()).flatMap {
@@ -112,13 +112,13 @@ class MainActivity extends Activity with TypedActivity
             deleteRepositories(reposIndexes)
         }
       case MainActivity.DialogIOError                 =>
-        buildErrorDialog(this, getResources().getString(R.string.io_error_message))
+        createErrorDialog(this, getResources().getString(R.string.io_error_message))
       case MainActivity.DialogIncorrectUserNameError  =>
-        buildErrorDialog(this, getResources().getString(R.string.incorrect_user_name_error_message))
+        createErrorDialog(this, getResources().getString(R.string.incorrect_user_name_error_message))
       case MainActivity.DialogIncorrectReposNameError =>
-        buildErrorDialog(this, getResources().getString(R.string.incorrect_repos_name_error_message))
+        createErrorDialog(this, getResources().getString(R.string.incorrect_repos_name_error_message))
       case MainActivity.DialogExistentReposError      =>
-        buildErrorDialog(this, getResources().getString(R.string.existent_repos_error_message))
+        createErrorDialog(this, getResources().getString(R.string.existent_repos_error_message))
       case _                                          =>
         super.onCreateDialog(id, bundle)
     }

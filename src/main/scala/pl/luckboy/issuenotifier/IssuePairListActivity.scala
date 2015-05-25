@@ -169,9 +169,9 @@ class IssuePairListActivity extends AbstractIssueListActivity[IssuePair]
   override def onCreateDialog(id: Int, bundle: Bundle) =
     id match {
       case IssuePairListActivity.DialogFetchingError =>
-        buildErrorDialog(this, getResources().getString(R.string.fetching_error_message))
+        createErrorDialog(this, getResources().getString(R.string.fetching_error_message))
       case IssuePairListActivity.DialogIOError       =>
-        buildErrorDialog(this, getResources().getString(R.string.io_error_message))
+        createErrorDialog(this, getResources().getString(R.string.io_error_message))
       case _                                         =>
         super.onCreateDialog(id, bundle)
     }
