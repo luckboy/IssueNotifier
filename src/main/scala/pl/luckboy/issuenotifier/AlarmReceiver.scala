@@ -31,7 +31,8 @@ object AlarmReceiver
   private var sWakeLock: Option[PowerManager#WakeLock] = None
   
   def releaseWakeLock() = {
-    for(wl <- sWakeLock) wl.release()
+    val tmpWakeLock = sWakeLock
     sWakeLock = None
+    for(wl <- tmpWakeLock) wl.release()
   }
 }

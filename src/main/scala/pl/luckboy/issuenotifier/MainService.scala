@@ -124,12 +124,12 @@ class MainService extends Service
         log(mTag, storeLastRepositoryTimestampInfos(this, mLastReposTimestampInfos))
         if(mustNotify) {
           val title = getResources().getQuantityString(R.plurals.notification_issues_title, issueCount)
-          val message = getResources().getQuantityString(R.plurals.notification_issues_message, issueCount)
+          val msg = getResources().getQuantityString(R.plurals.notification_issues_message, issueCount)
           val intent = new Intent(MainReceiver.ActionIssuePairs)
           log(mTag, "fetchAndNotify(): intent.getAction() = " + intent.getAction())
           val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
-          log(mTag, "fetchAndNotify(): notify(..., " + title + ", " + message + ", ...)")
-          AndroidUtils.notify(this, android.R.drawable.star_on, title, message, Some(pendingIntent), true)
+          log(mTag, "fetchAndNotify(): notify(..., " + title + ", " + msg + ", ...)")
+          AndroidUtils.notify(this, android.R.drawable.star_on, title, msg, Some(pendingIntent), true)
         }
         val alarmManager = getSystemService(Context.ALARM_SERVICE).asInstanceOf[AlarmManager]
         val intent2 = new Intent(this, classOf[AlarmReceiver])
