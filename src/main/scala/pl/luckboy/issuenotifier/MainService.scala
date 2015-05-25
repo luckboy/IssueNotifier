@@ -5,8 +5,10 @@
  *   v3 or later. See the LICENSE file for the full licensing terms.        *
  ****************************************************************************/
 package pl.luckboy.issuenotifier
+import android.app.AlarmManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Handler
@@ -21,7 +23,6 @@ class MainService extends Service
   private val mTag = getClass().getSimpleName()
   
   private var mHandler: Handler = null
-  private var mReposes: Vector[Repository] = null
   private var mLastReposTimestampInfos: Map[Repository, RepositoryTimestampInfo] = null
   private var mStopFlag: StopFlag = null
   private var mSettings: Settings = null
@@ -35,12 +36,16 @@ class MainService extends Service
   override def onCreate()
   {
     mHandler = new Handler()
+    mLastReposTimestampInfos = null
+    mStopFlag = null
+    mSettings = null
   }
   
   private def fetchAndNotify(stopFlag: StopFlag)()
   {
-    val tmpReposes = mReposes
-    val tmpLastReposTimestampInfos = mLastReposTimestampInfos
+    val startTime = System.currentTimeMillis()
+    val tmpReposes = log(mTag, loadRepositories(this)).fold(_ => Vector(), identity)
+    val tmpLastReposTimestampInfos = log(mTag, loadLastRepositoryTimestampInfos(this)).fold(_ => Map[Repository, RepositoryTimestampInfo](), identity)
     val tmpOldReposTimestampInfos = log(mTag, loadOldRepositoryTimestampInfos(this)).fold(_ => Map[Repository, RepositoryTimestampInfo](), identity)
     val tmpInterval = mSettings.interval
     val tmpState = mSettings.state
@@ -126,18 +131,29 @@ class MainService extends Service
           log(mTag, "fetchAndNotify(): notify(..., " + title + ", " + message + ", ...)")
           AndroidUtils.notify(this, android.R.drawable.star_on, title, message, Some(pendingIntent), true)
         }
-        postDelayed(mHandler, tmpInterval)(fetchAndNotify(stopFlag))
+        val alarmManager = getSystemService(Context.ALARM_SERVICE).asInstanceOf[AlarmManager]
+        val intent2 = new Intent(this, classOf[AlarmReceiver])
+        val pendingIntent2 = PendingIntent.getBroadcast(this, 0, intent2, 0)
+        log(mTag, "fetchAndNotify(): intent2.getAction() = " + intent2.getAction())
+        val endTime = System.currentTimeMillis()
+        val timeDiff = endTime - startTime
+        val delay = if(tmpInterval - timeDiff > 1000) tmpInterval - timeDiff else 1000
+        log(mTag, "fetchAndNotify(): startTime = " + new Date(startTime))
+        log(mTag, "fetchAndNotify(): endTime = " + new Date(endTime))
+        log(mTag, "fetchAndNotify(): delay = " + delay)
+        log(mTag, "fetchAndNotify(): endTime + delay = " + new Date(endTime + delay))
+        alarmManager.set(AlarmManager.RTC_WAKEUP, endTime + delay, pendingIntent2)
+        AlarmReceiver.releaseWakeLock()
     }
   }
   
   override def onStartCommand(intent: Intent, flags: Int, startId: Int) = {
     log(mTag, "onStartCommand(): starting ...")
-    mSettings = Settings(this)
-    mReposes = log(mTag, loadRepositories(this)).fold(_ => Vector(), identity)
-    mLastReposTimestampInfos = log(mTag, loadLastRepositoryTimestampInfos(this)).fold(_ => Map(), identity)
-    mStopFlag = StopFlag(false)
+    if(mLastReposTimestampInfos == null) mLastReposTimestampInfos = log(mTag, loadLastRepositoryTimestampInfos(this)).fold(_ => Map(), identity)
+    if(mStopFlag == null) mStopFlag = StopFlag(false)
+    if(mSettings == null) mSettings = Settings(this)
     log(mTag, "onStartCommand(): started")
-    post(mHandler)(fetchAndNotify(mStopFlag))
+    fetchAndNotify(mStopFlag)
     Service.START_NOT_STICKY
   }
   
@@ -146,6 +162,14 @@ class MainService extends Service
     log(mTag, "onDestroy(): stopping ...")
     mStopFlag.b = true
     mHandler.removeCallbacksAndMessages(null)
+    mSettings = null
+    mStopFlag = null
+    mLastReposTimestampInfos = null
+    mHandler = null
+    val alarmManager = getSystemService(Context.ALARM_SERVICE).asInstanceOf[AlarmManager]
+    val intent = new Intent(this, classOf[AlarmReceiver])
+    val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
+    alarmManager.cancel(pendingIntent)
     log(mTag, "onDestroy(): stopped")
   }  
 }
@@ -154,4 +178,3 @@ object MainService
 {
   val DataFetchers = Map[Server, DataFetcher](GitHubServer() -> DataFetcher(GitHubServer()))
 }
-

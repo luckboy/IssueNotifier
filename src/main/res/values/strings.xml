@@ -61,4 +61,6 @@
     <string name="incorrect_repos_name_error_message">Incorrect repository name.</string>
     <string name="existent_repos_error_message">Repository already exists.</string>
     <string name="not_found_repos_error_message">Repository isn\'t on server.</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

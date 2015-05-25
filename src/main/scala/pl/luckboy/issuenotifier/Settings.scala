@@ -11,7 +11,7 @@ import android.preference.PreferenceManager
 
 class Settings(preferences: SharedPreferences)
 {
-  def interval = preferences.getString("settings_interval", "30000").toInt
+  def interval = preferences.getString("settings_interval", "30000").toLong
   
   def state =
     preferences.getString("settings_state", "0").toInt match {

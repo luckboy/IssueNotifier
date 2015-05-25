@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="pl.luckboy.issuenotifier" android:installLocation="auto">
     <uses-sdk android:minSdkVersion="11"/>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <application android:label="@string/app_name" android:theme="@android:style/Theme.Holo.Light">
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -19,5 +20,6 @@
         <activity android:name="IssuePairListActivity"></activity>
         <activity android:name="IssueListActivity"></activity>
         <activity android:name="IssueActivity"></activity>
+        <receiver android:name="AlarmReceiver"></receiver>
     </application>
 </manifest>

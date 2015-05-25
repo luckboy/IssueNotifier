@@ -61,10 +61,10 @@ object AndroidUtils
     if(isWarning) builder.setIcon(android.R.drawable.ic_dialog_alert)
     builder.setTitle(title)
     builder.setMessage(msg)
-    builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+    builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
       override def onClick(dialog: DialogInterface, id: Int) = f()
     })
-    builder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+    builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
       override def onClick(dialog: DialogInterface, id: Int) = ()
     })
     builder.create()
