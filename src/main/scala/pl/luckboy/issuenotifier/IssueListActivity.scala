@@ -7,6 +7,7 @@
 package pl.luckboy.issuenotifier
 import android.app.Activity
 import android.os.Bundle
+import org.apache.http.HttpStatus
 import org.json.JSONObject
 import AndroidUtils._
 import LogStringUtils._
@@ -76,7 +77,12 @@ class IssueListActivity extends AbstractIssueListActivity[IssueInfo]
         }.getOrElse(Right(Vector()))
     } {
       case Left(e)           =>
-        showDialog(IssueListActivity.DialogFetchingError)
+        e match {
+          case HttpStatusException(HttpStatus.SC_NOT_FOUND, _) =>
+            showDialog(IssueListActivity.DialogNotFoundReposError)
+          case _                                               =>
+            showDialog(IssueListActivity.DialogFetchingError)
+        }
         f(Vector(), false)
       case Right(issueInfos) =>
         mPage += 1
@@ -86,9 +92,11 @@ class IssueListActivity extends AbstractIssueListActivity[IssueInfo]
   
   override def onCreateDialog(id: Int, bundle: Bundle) =
     id match {
-      case IssueListActivity.DialogFetchingError =>
+      case IssueListActivity.DialogFetchingError      =>
         createErrorDialog(this, getResources().getString(R.string.fetching_error_message))
-      case _                                     =>
+      case IssueListActivity.DialogNotFoundReposError =>
+        createErrorDialog(this, getResources().getString(R.string.not_found_repos_error_message))
+      case _                                          =>
         super.onCreateDialog(id, bundle)
     }
 }
@@ -96,6 +104,7 @@ class IssueListActivity extends AbstractIssueListActivity[IssueInfo]
 object IssueListActivity
 {
   private val DialogFetchingError = 0
+  private val DialogNotFoundReposError = 1
   
   val ExtraRepos = classOf[IssueListActivity].getName() + ".ExtraRepos"
 }

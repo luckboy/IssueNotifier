@@ -9,12 +9,13 @@ import java.io.InputStream
 import java.net.URI
 import java.net.URLEncoder
 import java.util.Scanner
-import org.apache.http.impl.client.DefaultHttpClient
+import org.apache.http.HttpStatus
 import org.apache.http.client.methods.HttpGet
-import org.json.JSONArray
-import org.json.JSONObject
+import org.apache.http.impl.client.DefaultHttpClient
 import org.apache.http.params.BasicHttpParams
 import org.apache.http.params.HttpConnectionParams
+import org.json.JSONArray
+import org.json.JSONObject
 
 object HttpUtils
 {
@@ -27,7 +28,10 @@ object HttpUtils
       request.setHeader("User-Agent", "IssueNotifier")
       for(p <- headers) request.setHeader(p._1, p._2)
       val response = client.execute(request)
-      Right(response.getEntity().getContent())
+      if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
+        Right(response.getEntity().getContent())
+      else
+        Left(HttpStatusException(response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase()))
     } catch {
       case e: Exception => Left(e)
     }
@@ -71,4 +75,9 @@ object HttpUtils
 
   def stringFromParams(params: Map[String, String]) =
     params.map { case (k, v) => encode(k) + "=" + encode(v) }.mkString("&")  
+}
+
+case class HttpStatusException(code: Int, phrase: String) extends Exception
+{
+  override def getMessage() = code + " " + phrase
 }

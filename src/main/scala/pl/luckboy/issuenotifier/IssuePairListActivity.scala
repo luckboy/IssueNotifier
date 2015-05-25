@@ -8,6 +8,7 @@ package pl.luckboy.issuenotifier
 import android.app.Activity
 import android.os.Bundle
 import android.widget.TextView
+import org.apache.http.HttpStatus
 import scala.annotation.tailrec
 import scala.collection.mutable.PriorityQueue
 import scala.collection.mutable.{ Map => MutableMap }
@@ -107,7 +108,11 @@ class IssuePairListActivity extends AbstractIssueListActivity[IssuePair]
                       res.fold(_ => "", issueInfos => " (issueInfoCount = " + issueInfos.size + ")"))
                   res
               }.getOrElse(Right(Vector())) match {
-                case Left(e) => Left(e)
+                case Left(e)           => 
+                  e match {
+                    case HttpStatusException(HttpStatus.SC_NOT_FOUND, _) => Right(issueInfoLists)
+                    case _                                               => Left(e)
+                  }
                 case Right(issueInfos) => Right(issueInfoLists :+ (repos -> issueInfos))
               }
             else
