@@ -29,6 +29,7 @@ import java.util.List
 import scala.collection.immutable.BitSet
 import AndroidUtils._
 import DataStorage._
+import TextUtils._
 
 class MainActivity extends Activity with TypedActivity
 {
@@ -268,7 +269,7 @@ object MainActivity
         })
       }
       val viewHolder = view.getTag().asInstanceOf[RepositoryListAdapter.ViewHolder]
-      viewHolder.textView.setText(stringFromRepository(reposes.get(position)))
+      viewHolder.textView.setText(textFromRepository(reposes.get(position)))
       viewHolder.checkBox.setChecked(listView.isItemChecked(position))
       view
     }
@@ -278,6 +279,4 @@ object MainActivity
   {
     private case class ViewHolder(textView: TextView, checkBox: CheckBox)
   }
-  
-  private def stringFromRepository(repos: Repository) = repos.userName + "/" + repos.name
 }

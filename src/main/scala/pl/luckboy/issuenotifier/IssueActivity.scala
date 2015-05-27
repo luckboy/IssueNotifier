@@ -9,11 +9,12 @@ import android.app.Activity
 import android.os.Bundle
 import android.os.Handler
 import android.webkit.WebView
-import java.text.SimpleDateFormat
+import java.util.Date
 import org.json.JSONObject
 import AndroidUtils._
 import DataStorage._
 import LogStringUtils._
+import TextUtils._
 
 class IssueActivity extends Activity with TypedActivity
 {
@@ -28,7 +29,8 @@ class IssueActivity extends Activity with TypedActivity
   private var mHandler: Handler = null
   private var mStopFlag: StopFlag = null
   private var mPage = 1L
-  private val mPerPage = 2
+  private val mPerPage = 20
+  private var mCurrentDate: Date = null
   
   override def onCreate(bundle: Bundle)
   {
@@ -75,15 +77,13 @@ class IssueActivity extends Activity with TypedActivity
       case Left(_)            =>
         showDialog(IssueActivity.DialogFetchingError)
       case Right(Some(issue)) =>
-        val stateStr = issue.info.state match {
-          case State.Open   => "!"
-          case State.Closed => "\u2713"
-        }
+        mCurrentDate = new Date()
         val s = (
-            "<!DOCTYPE html>\n" +
-            "<html>\n" +
+            "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n" + 
+            "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n" +
+            "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
             "<head>\n" +
-            "<link rel=\"stylesheet\" href=\"file:///android_asset/issue.css\">\n" +
+            "<link rel=\"stylesheet\" href=\"file:///android_asset/issue.css\"/>\n" +
             "<script src=\"file:///android_asset/issue.js\" type=\"text/javascript\"></script>\n" +
             "</head>\n" +
             "<body onscroll=\"onScroll()\">\n" +
@@ -92,7 +92,7 @@ class IssueActivity extends Activity with TypedActivity
             "<div id=\"loading\">Loading ...</div>" +
             "</body>\n" +
             "</html>")
-        mIssueWebView.loadDataWithBaseURL("file:///android_asset/", s, "text/html", "UTF-8", "")
+        mIssueWebView.loadDataWithBaseURL("file:///android_res/", s, "text/html", "UTF-8", "")
         mCanLoad = true
         loadComments()
       case Right(None)        => ()
@@ -105,26 +105,39 @@ class IssueActivity extends Activity with TypedActivity
     super.onDestroy()
   }
 
-  private val simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-  
-  private def htmlFromIssue(issue: Issue) =
+  private def htmlFromIssue(issue: Issue) = {
+    val stateStyleClassName = issue.info.state match {
+      case State.Open   => "block-state-icon-open"
+      case State.Closed => "block-state-icon-closed"
+    }
     "<div id=\"issue\">\n" +
     "\t<div class=\"header\">\n" +
-    "\t\t<h1>Issue of " + htmlFromString(mRepos.userName + "/" + mRepos.name) + "</h1>\n" +
-    "\t\t<h2>" + htmlFromString(issue.info.title) + "</h2>\n" +
-    "\t\t<span class=\"user\">" + htmlFromString(issue.info.user.name) + "</span>\n" +
-    "\t\t<span class=\"date\">" + simpleDateFormat.format(issue.info.createdAt) + "</span>\n" +
+    "\t\t<div class=\"block-repos block-repos-icon\">\n" +
+    "\t\t\t<div class=\"repos\">" + htmlFromString(textFromRepository(mRepos)) + "</div>\n" +
+    "\t\t</div>\n" +
+    "\t\t<div class=\"block-state-and-title " + stateStyleClassName + "\">\n" +
+    "\t\t\t<div class=\"title\">" + htmlFromString("#" + issue.info.number + " " + issue.info.title) + "</div>\n" +
+    "\t\t</div>\n" +
+    "\t\t<div class=\"block-user-and-date\">\n" +
+    "\t\t\t<span class=\"user\">" + htmlFromString(issue.info.user.name) + "</span>\n" +
+    "\t\t\t<span class=\"date\">" + htmlFromString(textFromDate(issue.info.createdAt, mCurrentDate)) + "</span>\n" +
+    "\t\t\t<div style=\"clear: both\"></div>\n" +
+    "\t\t</div>\n" +
     "\t</div>\n" +
     "\t<div class=\"body\">" + issue.bodyHtml + "</div>\n" +
     "</div>"
+  }
   
   private def htmlFromComment(comment: Comment) =
     "<div class=\"comment\">\n" +
     "\t<div class=\"header\">\n" +
-    "\t\t<span class=\"user\">" + htmlFromString(comment.user.name) + "</span>\n" +
-    "\t\t<span class=\"date\">" + simpleDateFormat.format(comment.createdAt) + "</span>\n" +
-    "\t</div>" +
-    "\t<div class=\"body\">" + comment.bodyHtml + "</div>" +
+    "\t\t<div class=\"block-user-and-date\">\n" +
+    "\t\t\t<span class=\"user\">" + htmlFromString(comment.user.name) + "</span>\n" +
+    "\t\t\t<span class=\"date\">" + htmlFromString(textFromDate(comment.createdAt, mCurrentDate)) + "</span>\n" +
+    "\t\t\t<div style=\"clear: both\"></div>\n" +
+    "\t\t</div>\n" +
+    "\t</div>\n" +
+    "\t<div class=\"body\">" + comment.bodyHtml + "</div>\n" +
     "</div>"
   
   private def loadComments()

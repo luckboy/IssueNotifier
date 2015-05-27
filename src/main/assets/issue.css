@@ -1,0 +1,98 @@
+/****************************************************************************
+ *   Copyright (C) 2015 Łukasz Szpakowski.                                  *
+ *                                                                          *
+ *   This software is licensed under the GNU General Public License         *
+ *   v3 or later. See the LICENSE file for the full licensing terms.        *
+ ****************************************************************************/
+
+body {
+	margin: 0pt;
+	padding: 0pt;
+	word-wrap: break-word;
+}
+
+.header .block-repos {
+	background-color: #e6e6e6;
+	padding-top: 1pt;
+	padding-bottom: 1pt;
+	margin-top: 10pt;
+	margin-left: 5pt;
+	margin-right: 5pt;
+    margin-bottom: 10pt;
+    border-radius: 5pt;
+}
+
+.header .block-repos-icon {
+	min-height: 26pt;
+    background-image: url(file:///android_res/drawable/repos.png); 
+	background-position: 5pt 11pt;
+    background-size: 24pt 24pt;
+	background-repeat: no-repeat;
+}
+
+.header .repos {
+	margin-left: 29pt;
+    margin-right: 5pt;
+	font-size: large;
+}
+
+.header .block-state-and-title {
+	background-color: #e6e6e6;
+	padding-top: 1pt;
+	padding-bottom: 1pt;
+	margin-top: 5pt;
+    margin-left: 5pt;
+	margin-right: 5pt;
+    margin-bottom: 5pt;
+    border-radius: 5pt;
+}
+
+.header .block-state-icon-open {
+	min-height: 26pt;
+	background-image: url(file:///android_res/drawable/open.png); 
+	background-position: 5pt 11pt;
+    background-size: 24pt 24pt;
+	background-repeat: no-repeat;
+}
+
+.header .block-state-icon-closed {
+	min-height: 26pt;
+	background-image: url(file:///android_res/drawable/closed.png); 
+	background-position: 5pt 11pt;
+    background-size: 24pt 24pt;
+	background-repeat: no-repeat;
+}
+
+.header .title {
+	margin-left: 29pt;
+    margin-right: 5pt;
+	font-size: large;
+}
+
+.header .block-user-and-date {
+	margin-left: 0pt;
+	margin-right: 0pt;
+}
+
+.header .user {
+	font-size: medium;
+	float: left;
+	margin-left: 10pt;
+}
+
+.header .date {
+	font-size: medium;
+	width: 70pt;
+	float: right;
+	text-align: right;
+	margin-right: 10pt;
+}
+
+.body {
+	margin-left: 10pt;
+	margin-right: 10pt;
+}
+
+#issue, .comment {
+	border-bottom: 1px solid #e6e6e6;
+}

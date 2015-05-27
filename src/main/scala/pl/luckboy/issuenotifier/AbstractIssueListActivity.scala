@@ -6,6 +6,7 @@
  ****************************************************************************/
 package pl.luckboy.issuenotifier
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
@@ -13,14 +14,15 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.AbsListView
 import android.widget.BaseAdapter
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.ProgressBar
 import android.widget.TextView
-import java.text.SimpleDateFormat
 import java.util.ArrayList
+import java.util.Date
 import AndroidUtils._
-import android.content.Intent
+import TextUtils._
 
 abstract class AbstractIssueListActivity[T <: AnyRef] extends Activity with TypedActivity
 {
@@ -103,13 +105,12 @@ abstract class AbstractIssueListActivity[T <: AnyRef] extends Activity with Type
 
 object AbstractIssueListActivity
 {
-  private val simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-  
   private object LoadingObject
   
   private class IssueListAdapter[T <: AnyRef](activity: Activity, items: ArrayList[T])(f: T => Repository, g: T => IssueInfo) extends BaseAdapter
   {
     var unloadedItems = true
+    var currentDate: Date = null
     
     def areUnloadItems = unloadedItems
     
@@ -119,13 +120,14 @@ object AbstractIssueListActivity
       if(convertView == null) {
         view = activity.getLayoutInflater().inflate(R.layout.issue_item, null)
         val layout = view.findViewById(R.id.issueItemLoadedLayout).asInstanceOf[LinearLayout]
-        val stateTextView = view.findViewById(R.id.issueItemStateTextView).asInstanceOf[TextView]
-        val numberTextView = view.findViewById(R.id.issueItemNumberTextView).asInstanceOf[TextView]
-        val titleTextView = view.findViewById(R.id.issueItemTitleTextView).asInstanceOf[TextView]
+        val openImageView = view.findViewById(R.id.issueItemOpenImageView).asInstanceOf[ImageView]
+        val closedImageView = view.findViewById(R.id.issueItemClosedImageView).asInstanceOf[ImageView]
         val reposTextView = view.findViewById(R.id.issueItemReposTextView).asInstanceOf[TextView]
+        val titleTextView = view.findViewById(R.id.issueItemTitleTextView).asInstanceOf[TextView]
+        val userTextView = view.findViewById(R.id.issueItemUserTextView).asInstanceOf[TextView]
         val dateTextView = view.findViewById(R.id.issueItemDateTextView).asInstanceOf[TextView]
         val progressBar = view.findViewById(R.id.issueItemProgressBar).asInstanceOf[ProgressBar]
-        view.setTag(IssueListAdapter.ViewHolder(layout, stateTextView, numberTextView, titleTextView, reposTextView, dateTextView, progressBar))
+        view.setTag(IssueListAdapter.ViewHolder(layout, openImageView, closedImageView, reposTextView, titleTextView, userTextView, dateTextView, progressBar))
     	view.setOnClickListener(new View.OnClickListener() {
           override def onClick(view: View)
           {
@@ -137,16 +139,19 @@ object AbstractIssueListActivity
       if(position < items.size()) {
         val item = items.get(position)
         val issueInfo = g(item)
-        val stateStr = issueInfo.state match {
-          case State.Open   => "!"
-          case State.Closed => "\u2713"
+        issueInfo.state match {
+          case State.Open   =>
+            viewHolder.openImageView.setVisibility(View.VISIBLE)
+            viewHolder.closedImageView.setVisibility(View.GONE)
+          case State.Closed =>
+            viewHolder.openImageView.setVisibility(View.GONE)
+            viewHolder.closedImageView.setVisibility(View.VISIBLE)
         }
-    	viewHolder.stateTextView.setText(stateStr)
-    	viewHolder.numberTextView.setText("#" + issueInfo.number)
-    	viewHolder.titleTextView.setText(issueInfo.title)
     	val repos = f(item)
-    	viewHolder.reposTextView.setText(repos.userName + "/" + repos.name)
-    	viewHolder.dateTextView.setText(simpleDateFormat.format(issueInfo.createdAt))
+    	viewHolder.reposTextView.setText(textFromRepository(repos))
+    	viewHolder.titleTextView.setText("#" + issueInfo.number + " " +issueInfo.title)
+    	viewHolder.userTextView.setText(issueInfo.user.name)
+    	viewHolder.dateTextView.setText(textFromDate(issueInfo.createdAt, currentDate))
     	viewHolder.layout.setVisibility(View.VISIBLE)
     	viewHolder.progessBar.setVisibility(View.GONE)
       } else {
@@ -161,16 +166,23 @@ object AbstractIssueListActivity
     override def getItem(position: Int) = if(position < items.size()) items.get(position) else LoadingObject
     
     override def getCount() = items.size() + (if(areUnloadItems) 1 else 0)
+    
+    override def notifyDataSetChanged()
+    {
+      currentDate = new Date()
+      super.notifyDataSetChanged()
+    }
   }
   
   private object IssueListAdapter
   {
     private case class ViewHolder(
         layout: LinearLayout, 
-        stateTextView: TextView,
-        numberTextView: TextView,
-        titleTextView: TextView,
+        openImageView: ImageView,
+        closedImageView: ImageView,
         reposTextView: TextView,
+        titleTextView: TextView,
+        userTextView: TextView,
         dateTextView: TextView,
         progessBar: ProgressBar)
   }
