@@ -127,16 +127,18 @@ object AbstractIssueListActivity
         val userTextView = view.findViewById(R.id.issueItemUserTextView).asInstanceOf[TextView]
         val dateTextView = view.findViewById(R.id.issueItemDateTextView).asInstanceOf[TextView]
         val progressBar = view.findViewById(R.id.issueItemProgressBar).asInstanceOf[ProgressBar]
-        view.setTag(IssueListAdapter.ViewHolder(layout, openImageView, closedImageView, reposTextView, titleTextView, userTextView, dateTextView, progressBar))
+        val viewHolder = IssueListAdapter.ViewHolder(position, layout, openImageView, closedImageView, reposTextView, titleTextView, userTextView, dateTextView, progressBar)
+        view.setTag(viewHolder)
     	view.setOnClickListener(new View.OnClickListener() {
           override def onClick(view: View)
           {
-            if(position < items.size()) listView.performItemClick(convertView, position, getItemId(position)) 
+            if(position < items.size()) listView.performItemClick(convertView, viewHolder.position, getItemId(position)) 
           }
         })
       }
       val viewHolder = view.getTag().asInstanceOf[IssueListAdapter.ViewHolder]
       if(position < items.size()) {
+        viewHolder.position = position
         val item = items.get(position)
         val issueInfo = g(item)
         issueInfo.state match {
@@ -177,6 +179,7 @@ object AbstractIssueListActivity
   private object IssueListAdapter
   {
     private case class ViewHolder(
+        var position: Int, 
         layout: LinearLayout, 
         openImageView: ImageView,
         closedImageView: ImageView,

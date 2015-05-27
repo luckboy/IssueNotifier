@@ -252,23 +252,25 @@ object MainActivity
       if(convertView == null) {
         view = activity.getLayoutInflater().inflate(R.layout.repos_item, null)
         val textView = view.findViewById(R.id.reposItemTextView).asInstanceOf[TextView]
+        val checkBox = view.findViewById(R.id.reposItemCheckBox).asInstanceOf[CheckBox]
+        val viewHolder = RepositoryListAdapter.ViewHolder(position, textView, checkBox)
+        view.setTag(viewHolder)
         textView.setOnClickListener(new View.OnClickListener() {
           override def onClick(view: View)
           {
-            listView.performItemClick(convertView, position, getItemId(position)) 
+            listView.performItemClick(convertView, viewHolder.position, getItemId(position)) 
           }
         })
-        val checkBox = view.findViewById(R.id.reposItemCheckBox).asInstanceOf[CheckBox]
-        view.setTag(RepositoryListAdapter.ViewHolder(textView, checkBox))
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
           override def onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean)
           {
-            listView.setItemChecked(position, isChecked)
+            listView.setItemChecked(viewHolder.position, isChecked)
             activity.updateDeleteReposesItem()
           }
         })
       }
       val viewHolder = view.getTag().asInstanceOf[RepositoryListAdapter.ViewHolder]
+      viewHolder.position = position
       viewHolder.textView.setText(textFromRepository(reposes.get(position)))
       viewHolder.checkBox.setChecked(listView.isItemChecked(position))
       view
@@ -277,6 +279,6 @@ object MainActivity
   
   private object RepositoryListAdapter
   {
-    private case class ViewHolder(textView: TextView, checkBox: CheckBox)
+    private case class ViewHolder(var position: Int, textView: TextView, checkBox: CheckBox)
   }
 }
