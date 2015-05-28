@@ -129,7 +129,7 @@ class MainService extends Service
           log(mTag, "fetchAndNotify(): intent.getAction() = " + intent.getAction())
           val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
           log(mTag, "fetchAndNotify(): notify(..., " + title + ", " + msg + ", ...)")
-          AndroidUtils.notify(this, 1, android.R.drawable.star_on, title, msg, Some(pendingIntent), true, true, mSettings.ringtone, mSettings.vibration)
+          AndroidUtils.notify(this, 1, R.drawable.small_app_icon, Some(R.drawable.app_icon), title, msg, Some(pendingIntent), true, true, mSettings.ringtone, mSettings.vibration)
         }
         val alarmManager = getSystemService(Context.ALARM_SERVICE).asInstanceOf[AlarmManager]
         val intent2 = new Intent(this, classOf[AlarmReceiver])
@@ -157,7 +157,7 @@ class MainService extends Service
     val title = getResources().getString(R.string.notification_service_title)
     val msg = getResources().getString(R.string.notification_service_message)
     log(mTag, "onStartCommand(): notify(..., " + title + ", " + msg + ", ...)")
-    AndroidUtils.notify(this, 0, android.R.drawable.star_on, title, msg, Some(pendingIntent), false, false, false, false)
+    AndroidUtils.notify(this, 0, R.drawable.small_app_icon, Some(R.drawable.app_icon), title, msg, Some(pendingIntent), false, false, false, false)
     log(mTag, "onStartCommand(): started")
     fetchAndNotify(mStopFlag)
     Service.START_NOT_STICKY

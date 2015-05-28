@@ -5,16 +5,17 @@
  *   v3 or later. See the LICENSE file for the full licensing terms.        *
  ****************************************************************************/
 package pl.luckboy.issuenotifier
+import android.app.AlertDialog
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.DialogInterface
+import android.graphics.BitmapFactory
 import android.os.Handler
 import android.text.Html
 import android.text.SpannedString
 import android.util.Log
-import android.app.AlertDialog
-import android.content.DialogInterface
 
 object AndroidUtils
 {
@@ -81,10 +82,11 @@ object AndroidUtils
     builder.create()
   }
   
-  def notify(context: Context, id: Int, smallIconId: Int, title: String, body: String, optPendingIntent: Option[PendingIntent], isTicker: Boolean, isAutoCancel: Boolean, isRingtone: Boolean, isVibration: Boolean)
+  def notify(context: Context, id: Int, smallIconId: Int, largeIconId: Option[Int], title: String, body: String, optPendingIntent: Option[PendingIntent], isTicker: Boolean, isAutoCancel: Boolean, isRingtone: Boolean, isVibration: Boolean)
   {
     val builder = new Notification.Builder(context)
     builder.setSmallIcon(smallIconId)
+    for(id <- largeIconId) builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), id))
     builder.setContentTitle(title)
     builder.setContentText(body)
     if(isTicker) builder.setTicker(body)
