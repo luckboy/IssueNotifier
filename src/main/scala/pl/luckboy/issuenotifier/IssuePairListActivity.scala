@@ -20,10 +20,8 @@ class IssuePairListActivity extends AbstractIssueListActivity[IssuePair]
 {
   override protected val mTag = getClass().getSimpleName()
   
-  private var mIssueListTextView: TextView = null
   private var mReposes: Vector[Repository] = null
   private var mState: RequestIssueState = null
-  private var mSortingByCreated = false
   private var mSorting: IssueSorting.Value = null
   private var mPage = 1L
   private var mIssuePairQueue: PriorityQueue[IssuePair] = null
@@ -47,8 +45,7 @@ class IssuePairListActivity extends AbstractIssueListActivity[IssuePair]
   override protected val mIssueInfoFromItem = (issuePair: IssuePair) => issuePair.issueInfo
   
   override protected def initialize() = {
-    mIssueListTextView = findView(TR.issueListTextView)
-    mIssueListTextView.setText(getResources().getString(R.string.issue_list_issues_from_all_reposes))
+    mIssueListTextView.setText(getResources().getString(R.string.issue_list_issues_of_all_reposes))
     loadRepositories(this) match {
       case Left(e)        => 
         false
@@ -57,7 +54,7 @@ class IssuePairListActivity extends AbstractIssueListActivity[IssuePair]
         val settings = Settings(this)
         mState = settings.state
         mSortingByCreated = settings.sortingByCreated
-        mSorting = if(settings.sortingByCreated) IssueSorting.Created else IssueSorting.Updated
+        mSorting = if(mSortingByCreated) IssueSorting.Created else IssueSorting.Updated
         mPage = 1
         val issuePairOrdering = new Ordering[IssuePair] {
           override def compare(issuePair1: IssuePair, issuePair2: IssuePair) =
@@ -69,6 +66,8 @@ class IssuePairListActivity extends AbstractIssueListActivity[IssuePair]
         mIssuePairQueue = PriorityQueue()(issuePairOrdering)
         mUnloadedIssuePairReposes = mReposes.toSet
         mReposIssueCounts = mReposes.map { _ -> 0L }.toMap
+        mReposTimestampInfos = log(mTag, loadPreviousOldRepositoryTimestampInfos(this)).fold(_ => Map(), identity)
+        mCanShowReposes = true
         true
     }
   }

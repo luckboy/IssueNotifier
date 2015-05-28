@@ -7,6 +7,7 @@
 package pl.luckboy.issuenotifier
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
@@ -28,12 +29,16 @@ abstract class AbstractIssueListActivity[T <: AnyRef] extends Activity with Type
 {
   protected val mTag: String
   
+  protected var mIssueListTextView: TextView = null
   private var mItems: ArrayList[T] = null
   private var mIssueListView: ListView = null
   private var mIssueListAdapter: AbstractIssueListActivity.IssueListAdapter[T] = null
   private var mCanLoad = true
   protected var mHandler: Handler = null
   protected var mStopFlag: StopFlag = null
+  protected var mReposTimestampInfos: Map[Repository, RepositoryTimestampInfo] = Map()
+  protected var mCanShowReposes = true
+  protected var mSortingByCreated = false;
   protected val mPerPage = 20
   
   override def onCreate(bundle: Bundle)
@@ -43,9 +48,10 @@ abstract class AbstractIssueListActivity[T <: AnyRef] extends Activity with Type
     setContentView(R.layout.issue_list)
     mHandler = new Handler()
     mItems = new ArrayList[T]()
+    mIssueListTextView = findView(TR.issueListTextView)
     if(!initialize()) return
     mIssueListView = findView(TR.issueListView)
-    mIssueListAdapter = new AbstractIssueListActivity.IssueListAdapter[T](this, mItems)(mRepositoryFromItem, mIssueInfoFromItem)
+    mIssueListAdapter = new AbstractIssueListActivity.IssueListAdapter[T](this, mItems, mReposTimestampInfos, mSortingByCreated, mCanShowReposes)(mRepositoryFromItem, mIssueInfoFromItem)
     mIssueListView.setAdapter(mIssueListAdapter)
     mIssueListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       override def onItemClick(parent: AdapterView[_], view: View, position: Int, id: Long)
@@ -107,7 +113,7 @@ object AbstractIssueListActivity
 {
   private object LoadingObject
   
-  private class IssueListAdapter[T <: AnyRef](activity: Activity, items: ArrayList[T])(f: T => Repository, g: T => IssueInfo) extends BaseAdapter
+  private class IssueListAdapter[T <: AnyRef](activity: Activity, items: ArrayList[T], reposTimestampInfos: Map[Repository, RepositoryTimestampInfo], isSortingByCreated: Boolean, canShowReposes: Boolean)(f: T => Repository, g: T => IssueInfo) extends BaseAdapter
   {
     var unloadedItems = true
     var currentDate: Date = null
@@ -141,6 +147,10 @@ object AbstractIssueListActivity
         viewHolder.position = position
         val item = items.get(position)
         val issueInfo = g(item)
+        val repos = f(item)
+        val isEarlier = reposTimestampInfos.get(repos).map {
+          reposTimestampInfo => issueInfo.isEarlierIssue(reposTimestampInfo, isSortingByCreated)
+        }.getOrElse(true)
         issueInfo.state match {
           case State.Open   =>
             viewHolder.openImageView.setVisibility(View.VISIBLE)
@@ -149,8 +159,15 @@ object AbstractIssueListActivity
             viewHolder.openImageView.setVisibility(View.GONE)
             viewHolder.closedImageView.setVisibility(View.VISIBLE)
         }
-    	val repos = f(item)
-    	viewHolder.reposTextView.setText(textFromRepository(repos))
+        if(canShowReposes) {
+          viewHolder.reposTextView.setVisibility(View.VISIBLE)
+    	  viewHolder.reposTextView.setText(textFromRepository(repos))
+        } else
+          viewHolder.reposTextView.setVisibility(View.GONE)
+        if(isEarlier)
+          viewHolder.titleTextView.setTypeface(Typeface.DEFAULT_BOLD)
+        else
+          viewHolder.titleTextView.setTypeface(Typeface.DEFAULT)
     	viewHolder.titleTextView.setText("#" + issueInfo.number + " " +issueInfo.title)
     	viewHolder.userTextView.setText(issueInfo.user.name)
     	viewHolder.dateTextView.setText(textFromDate(issueInfo.createdAt, currentDate))

@@ -2,8 +2,8 @@
 <resources>
     <string name="app_name">IssueNotifier</string>
     <string name="main_reposes">Repositories:</string>
-    <string name="issue_list_issues">Issues:</string>
-    <string name="issue_list_issues_from_all_reposes">Issues from all repositories:</string>
+    <string name="issue_list_issues_of_repos">Issues of %s:</string>
+    <string name="issue_list_issues_of_all_reposes">Issues of all repositories:</string>
     <string name="main_menu_add_repos_title">Add repository</string>
     <string name="main_menu_delete_reposes_title">Delete repository(ies)</string>
     <plurals name="main_menu_delete_reposes_title">
@@ -31,7 +31,7 @@
     <string name="settings_screen_state_summary">State of fetching issues</string>
     <string name="settings_screen_sorting_by_created_title">Sorting by creation time</string>
     <string name="settings_screen_sorting_by_created_summary">Sorting of issues by creation time instead of update time</string>
-    <string name="setings_screen_ringtone_title">Ringtone</string>
+    <string name="settings_screen_ringtone_title">Ringtone</string>
     <string name="settings_screen_ringtone_summary_on">Ringtone for notifications is enabled</string>
     <string name="settings_screen_ringtone_summary_off">Ringtone for notifications is disabled</string>
     <string name="settings_screen_vibration_title">Vibration</string>

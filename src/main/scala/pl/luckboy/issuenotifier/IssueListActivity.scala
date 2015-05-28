@@ -10,7 +10,9 @@ import android.os.Bundle
 import org.apache.http.HttpStatus
 import org.json.JSONObject
 import AndroidUtils._
+import DataStorage._
 import LogStringUtils._
+import TextUtils._
 
 class IssueListActivity extends AbstractIssueListActivity[IssueInfo]
 {
@@ -43,10 +45,14 @@ class IssueListActivity extends AbstractIssueListActivity[IssueInfo]
         case Left(e)      => false
         case Right(repos) =>
           mRepos = repos
+          mIssueListTextView.setText(String.format(getResources().getString(R.string.issue_list_issues_of_repos), textFromRepository(mRepos)))
           val settings = Settings(this)
           mState = settings.state
-          mSorting = if(settings.sortingByCreated) IssueSorting.Created else IssueSorting.Updated
+          mSortingByCreated = settings.sortingByCreated
+          mSorting = if(mSortingByCreated) IssueSorting.Created else IssueSorting.Updated
           mPage = 1
+          mReposTimestampInfos = log(mTag, loadOldRepositoryTimestampInfos(this)).fold(_ => Map(), identity)
+          mCanShowReposes = false
           true
       }
     } catch {

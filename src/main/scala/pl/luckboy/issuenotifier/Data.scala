@@ -79,6 +79,12 @@ case class IssueInfo(
     createdAt: Date,
     updatedAt: Date) extends JSONable
 {
+  def isEarlierIssue(reposTimestampInfo: RepositoryTimestampInfo, isSortingByCreated: Boolean) =
+    if(!isSortingByCreated)
+      updatedAt.compareTo(reposTimestampInfo.updatedIssueAt) > 0
+    else
+      createdAt.compareTo(reposTimestampInfo.createdIssueAt) > 0
+  
   override def toJSONObject = {
     val sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS")
     val jsonObject = new JSONObject()
