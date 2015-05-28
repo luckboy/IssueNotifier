@@ -22,6 +22,10 @@ class Settings(preferences: SharedPreferences)
   
   def sortingByCreated = preferences.getBoolean("settings_sorting_by_created", false)
   
+  def ringtone = preferences.getBoolean("settings_ringtone", true)
+  
+  def vibration = preferences.getBoolean("settings_vibration", true)
+  
   def startedService =  preferences.getBoolean("main_started_service", false)
   
   def startedService_=(b: Boolean) = { preferences.edit().putBoolean("main_started_service", b).commit(); () }

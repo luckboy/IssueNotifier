@@ -129,7 +129,7 @@ class MainService extends Service
           log(mTag, "fetchAndNotify(): intent.getAction() = " + intent.getAction())
           val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
           log(mTag, "fetchAndNotify(): notify(..., " + title + ", " + msg + ", ...)")
-          AndroidUtils.notify(this, android.R.drawable.star_on, title, msg, Some(pendingIntent), true)
+          AndroidUtils.notify(this, 1, android.R.drawable.star_on, title, msg, Some(pendingIntent), true, true, mSettings.ringtone, mSettings.vibration)
         }
         val alarmManager = getSystemService(Context.ALARM_SERVICE).asInstanceOf[AlarmManager]
         val intent2 = new Intent(this, classOf[AlarmReceiver])
@@ -152,6 +152,12 @@ class MainService extends Service
     if(mLastReposTimestampInfos == null) mLastReposTimestampInfos = log(mTag, loadLastRepositoryTimestampInfos(this)).fold(_ => Map(), identity)
     if(mStopFlag == null) mStopFlag = StopFlag(false)
     if(mSettings == null) mSettings = Settings(this)
+    val intent = new Intent(this, classOf[MainActivity])
+    val pendingIntent = PendingIntent.getActivity(this, 0, intent, 0)    
+    val title = getResources().getString(R.string.notification_service_title)
+    val msg = getResources().getString(R.string.notification_service_message)
+    log(mTag, "onStartCommand(): notify(..., " + title + ", " + msg + ", ...)")
+    AndroidUtils.notify(this, 0, android.R.drawable.star_on, title, msg, Some(pendingIntent), false, false, false, false)
     log(mTag, "onStartCommand(): started")
     fetchAndNotify(mStopFlag)
     Service.START_NOT_STICKY
@@ -160,6 +166,7 @@ class MainService extends Service
   override def onDestroy()
   {
     log(mTag, "onDestroy(): stopping ...")
+    cancleNotification(this, 0)
     mStopFlag.b = true
     mHandler.removeCallbacksAndMessages(null)
     mSettings = null

@@ -2,6 +2,8 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     <ListPreference android:title="@string/settings_screen_interval_title" android:key="settings_interval" android:entryValues="@array/settings_screen_interval_values" android:entries="@array/settings_screen_intervals" android:summary="@string/settings_screen_interval_summary" android:defaultValue="1800000"/>
     <ListPreference android:title="@string/settings_screen_state_title" android:key="settings_state" android:entryValues="@array/settings_screen_state_values" android:entries="@array/settings_screen_states" android:summary="@string/settings_screen_state_summary" android:defaultValue="0"/>
-    <CheckBoxPreference android:key="settings_sorting_by_created" android:title="@string/settings_screen_sorting_by_created_title" android:summaryOff="@string/settings_screen_sorting_by_created_summary_off" android:summaryOn="@string/settings_screen_sorting_by_created_summary_on" android:defaultValue="false"/>
+    <CheckBoxPreference android:key="settings_sorting_by_created" android:title="@string/settings_screen_sorting_by_created_title" android:defaultValue="false" android:summary="@string/settings_screen_sorting_by_created_summary"/>
+    <CheckBoxPreference android:key="settings_ringtone" android:summaryOn="@string/settings_screen_ringtone_summary_on" android:title="@string/settings_screen_interval_title" android:summaryOff="@string/settings_screen_ringtone_summary_off" android:defaultValue="true"/>
+    <CheckBoxPreference android:key="settings_vibration" android:summaryOn="@string/settings_screen_vibration_summary_on" android:title="@string/settings_screen_vibration_title" android:summaryOff="@string/settings_screen_vibration_summary_off" android:defaultValue="true"/>
     <Preference android:key="settings_delete_timestamps" android:title="@string/settings_screen_delete_timestamps_title"/>
 </PreferenceScreen>

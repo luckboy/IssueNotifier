@@ -81,17 +81,26 @@ object AndroidUtils
     builder.create()
   }
   
-  def notify(context: Context, smallIconId: Int, title: String, body: String, optPendingIntent: Option[PendingIntent], isAutoCancel: Boolean)
+  def notify(context: Context, id: Int, smallIconId: Int, title: String, body: String, optPendingIntent: Option[PendingIntent], isTicker: Boolean, isAutoCancel: Boolean, isRingtone: Boolean, isVibration: Boolean)
   {
     val builder = new Notification.Builder(context)
     builder.setSmallIcon(smallIconId)
     builder.setContentTitle(title)
     builder.setContentText(body)
+    if(isTicker) builder.setTicker(body)
     for(pendingIntent <- optPendingIntent) builder.setContentIntent(pendingIntent)
     val notification = builder.getNotification()
-    notification.flags |= (if(isAutoCancel) Notification.FLAG_AUTO_CANCEL else 0) | Notification.FLAG_NO_CLEAR 
-    val nofificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
-    nofificationManager.notify(0, notification)
+    notification.flags |= (if(isAutoCancel) Notification.FLAG_AUTO_CANCEL else 0) | Notification.FLAG_NO_CLEAR
+    if(isRingtone) notification.defaults |= Notification.DEFAULT_SOUND
+    if(isVibration) notification.defaults |= Notification.DEFAULT_VIBRATE
+    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
+    notificationManager.notify(id, notification)
+  }
+  
+  def cancleNotification(context: Context, id: Int)
+  {
+    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
+    notificationManager.cancel(id)
   }
   
   def log(tag: String, s: String) = { Log.i(tag, s); () }
