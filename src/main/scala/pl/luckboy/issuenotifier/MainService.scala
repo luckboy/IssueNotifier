@@ -157,7 +157,7 @@ class MainService extends Service
     val title = getResources().getString(R.string.notification_service_title)
     val msg = getResources().getString(R.string.notification_service_message)
     log(mTag, "onStartCommand(): notify(..., " + title + ", " + msg + ", ...)")
-    AndroidUtils.notify(this, 0, R.drawable.small_app_icon, Some(R.drawable.app_icon), title, msg, Some(pendingIntent), false, false, false, false)
+    AndroidUtils.notify(this, 0, R.drawable.small_service_icon, Some(R.drawable.service_icon), title, msg, Some(pendingIntent), false, false, false, false)
     log(mTag, "onStartCommand(): started")
     fetchAndNotify(mStopFlag)
     Service.START_NOT_STICKY
