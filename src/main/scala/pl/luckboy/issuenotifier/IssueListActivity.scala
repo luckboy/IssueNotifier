@@ -39,6 +39,10 @@ class IssueListActivity extends AbstractIssueListActivity[IssueInfo]
   
   override protected val mIssueInfoFromItem = (issueInfo: IssueInfo) => issueInfo
   
+  override protected def jsonObjectFromItem(item: IssueInfo) = item.toJSONObject
+  
+  override protected def itemFromJSONObject(jsonObject: JSONObject) = IssueInfo.fromJSONObject(jsonObject)
+
   override protected def initialize() =
     try {
       log(mTag, Repository.fromJSONObject(new JSONObject(getIntent().getStringExtra(IssueListActivity.ExtraRepos)))) match {

@@ -119,10 +119,13 @@ class GitHubDataFetcher(val apiURI: String) extends DataFetcher
       val state = stateFromString(jsonObject.getString("state"))
       val title = jsonObject.getString("title")
       val commentCount = jsonObject.getLong("comments")
-      val closedAtStr = jsonObject.optString("closed_at")
+      val closedAtStr = if(jsonObject.has("closed_at") && !jsonObject.isNull("closed_at"))
+        jsonObject.getString("closed_at")
+      else
+        ""
       val createdAtStr = jsonObject.getString("created_at")
       val updatedAtStr = jsonObject.getString("updated_at")
-      val closedAt = if(closedAtStr == "") Some(simpleDateFormat.parse(closedAtStr)) else None
+      val closedAt = if(closedAtStr != "") Some(simpleDateFormat.parse(closedAtStr)) else None
       val createdAt = simpleDateFormat.parse(createdAtStr)
       val updatedAt =  simpleDateFormat.parse(updatedAtStr)
       userFromJSONObject(jsonObject.getJSONObject("user")) match {

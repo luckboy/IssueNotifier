@@ -9,6 +9,7 @@ import android.app.Activity
 import android.os.Bundle
 import android.widget.TextView
 import org.apache.http.HttpStatus
+import org.json.JSONObject
 import scala.annotation.tailrec
 import scala.collection.mutable.PriorityQueue
 import scala.collection.mutable.{ Map => MutableMap }
@@ -44,6 +45,10 @@ class IssuePairListActivity extends AbstractIssueListActivity[IssuePair]
   
   override protected val mIssueInfoFromItem = (issuePair: IssuePair) => issuePair.issueInfo
   
+  override protected def jsonObjectFromItem(item: IssuePair) = item.toJSONObject
+  
+  override protected def itemFromJSONObject(jsonObject: JSONObject) = IssuePair.fromJSONObject(jsonObject)
+
   override protected def initialize() = {
     mIssueListTextView.setText(getResources().getString(R.string.issue_list_issues_of_all_reposes))
     loadRepositories(this) match {

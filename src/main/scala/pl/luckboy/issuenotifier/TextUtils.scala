@@ -16,6 +16,8 @@ object TextUtils
   
   private val timeSimpleDateFormat = new SimpleDateFormat("HH:mm:ss")
   
+  private val longSimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+  
   def textFromRepository(repos: Repository) = repos.userName + "/" + repos.name
   
   def textFromDate(date: Date, currentDate: Date) = {
@@ -29,4 +31,6 @@ object TextUtils
     else
       dateSimpleDateFormat.format(date)
   }
+  
+  def textFromDateForLongFormat(date: Date) = longSimpleDateFormat.format(date)
 }

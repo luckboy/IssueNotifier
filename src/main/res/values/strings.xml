@@ -70,4 +70,14 @@
     <string name="not_found_repos_error_message">Repository isn\'t on server.</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="details_title">Details</string>
+    <string name="details_message_repos">Repository: %s</string>
+    <string name="details_message_title">Title: %s</string>
+    <string name="details_message_number">Number: %d</string>
+    <string name="details_message_state">State: %s</string>
+    <string name="details_message_comment_count">Comments: %d</string>
+    <string name="details_message_user">Author: %s</string>
+    <string name="details_message_closed_at">Closed at: %s</string>
+    <string name="details_message_created_at">Created at: %s</string>
+    <string name="details_message_updated_at">Updated at: %s</string>
 </resources>

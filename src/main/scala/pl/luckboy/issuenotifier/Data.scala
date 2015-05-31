@@ -113,7 +113,10 @@ object IssueInfo
       User.fromJSONObject(jsonObject.getJSONObject("user")) match {
         case Left(e)     => Left(e)
         case Right(user) =>
-          val closedAtStr = jsonObject.optString("closedAt")
+          val closedAtStr = if(jsonObject.has("closedAt") && !jsonObject.isNull("closedAt"))
+            jsonObject.getString("closedAt")
+          else
+            ""
           val createdAtStr = jsonObject.getString("createdAt")
           val updatedAtStr = jsonObject.getString("updatedAt")
           val closedAt = if(closedAtStr != "") Some(sdf.parse(closedAtStr)) else None
