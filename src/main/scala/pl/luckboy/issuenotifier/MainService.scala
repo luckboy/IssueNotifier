@@ -17,6 +17,7 @@ import java.util.Date
 import AndroidUtils._
 import DataStorage._
 import LogStringUtils._
+import android.os.PowerManager
 
 class MainService extends Service
 {
@@ -26,6 +27,7 @@ class MainService extends Service
   private var mLastReposTimestampInfos: Map[Repository, RepositoryTimestampInfo] = null
   private var mStopFlag: StopFlag = null
   private var mSettings: Settings = null
+  private var mHasNotification = false
   
   private val mBinder = new Binder {
     def getService(): MainService = MainService.this
@@ -39,6 +41,7 @@ class MainService extends Service
     mLastReposTimestampInfos = null
     mStopFlag = null
     mSettings = null
+    mHasNotification = false 
   }
   
   private def fetchAndNotify(stopFlag: StopFlag)()
@@ -123,6 +126,7 @@ class MainService extends Service
         log(mTag, "fetchAndNotify(): issueCount = " + issueCount)
         log(mTag, storeLastRepositoryTimestampInfos(this, mLastReposTimestampInfos))
         if(mustNotify) {
+          acquireNotificationWakeLock()
           val title = getResources().getQuantityString(R.plurals.notification_issues_title, issueCount)
           val msg = getResources().getQuantityString(R.plurals.notification_issues_message, issueCount)
           val intent = new Intent(MainReceiver.ActionIssuePairs)
@@ -152,13 +156,17 @@ class MainService extends Service
     if(mLastReposTimestampInfos == null) mLastReposTimestampInfos = log(mTag, loadLastRepositoryTimestampInfos(this)).fold(_ => Map(), identity)
     if(mStopFlag == null) mStopFlag = StopFlag(false)
     if(mSettings == null) mSettings = Settings(this)
-    val intent = new Intent(this, classOf[MainActivity])
-    val pendingIntent = PendingIntent.getActivity(this, 0, intent, 0)    
-    val title = getResources().getString(R.string.notification_service_title)
-    val msg = getResources().getString(R.string.notification_service_message)
-    log(mTag, "onStartCommand(): notify(..., " + title + ", " + msg + ", ...)")
-    AndroidUtils.notify(this, 0, R.drawable.small_service_icon, Some(R.drawable.service_icon), title, msg, Some(pendingIntent), false, false, false, false)
+    if(!mHasNotification) {
+      val intent = new Intent(this, classOf[MainActivity])
+      val pendingIntent = PendingIntent.getActivity(this, 0, intent, 0)    
+      val title = getResources().getString(R.string.notification_service_title)
+      val msg = getResources().getString(R.string.notification_service_message)
+      log(mTag, "onStartCommand(): notify(..., " + title + ", " + msg + ", ...)")
+      AndroidUtils.notify(this, 0, R.drawable.small_service_icon, Some(R.drawable.service_icon), title, msg, Some(pendingIntent), false, false, false, false)
+      mHasNotification = true;
+    }
     log(mTag, "onStartCommand(): started")
+    AlarmReceiver.acquireWakeLock(this)
     fetchAndNotify(mStopFlag)
     Service.START_NOT_STICKY
   }
@@ -166,9 +174,10 @@ class MainService extends Service
   override def onDestroy()
   {
     log(mTag, "onDestroy(): stopping ...")
-    cancleNotification(this, 0)
-    mStopFlag.b = true
-    mHandler.removeCallbacksAndMessages(null)
+    cancelNotification(this, 0)
+    if(mStopFlag != null) mStopFlag.b = true
+    if(mHandler != null) mHandler.removeCallbacksAndMessages(null)
+    mHasNotification = false
     mSettings = null
     mStopFlag = null
     mLastReposTimestampInfos = null
@@ -178,7 +187,14 @@ class MainService extends Service
     val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
     alarmManager.cancel(pendingIntent)
     log(mTag, "onDestroy(): stopped")
-  }  
+  }
+  
+  private def acquireNotificationWakeLock()
+  {
+    val powerManager = getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager]
+    val notificatinWakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "MainServiceWakeLock")
+    notificatinWakeLock.acquire(20000)
+  }
 }
 
 object MainService

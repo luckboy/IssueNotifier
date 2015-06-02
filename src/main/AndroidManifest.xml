@@ -3,6 +3,7 @@
     <uses-sdk android:minSdkVersion="11"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <application android:label="@string/app_name" android:theme="@android:style/Theme.Holo.Light" android:icon="@drawable/app_icon">
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -21,5 +22,10 @@
         <activity android:name="IssueListActivity"></activity>
         <activity android:name="IssueActivity"></activity>
         <receiver android:name="AlarmReceiver"></receiver>
+        <receiver android:name="BootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

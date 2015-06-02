@@ -26,7 +26,7 @@ class Settings(preferences: SharedPreferences)
   
   def vibration = preferences.getBoolean("settings_vibration", true)
   
-  def startedService =  preferences.getBoolean("main_started_service", false)
+  def startedService = preferences.getBoolean("main_started_service", false)
   
   def startedService_=(b: Boolean) = { preferences.edit().putBoolean("main_started_service", b).commit(); () }
 }

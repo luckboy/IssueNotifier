@@ -18,10 +18,8 @@ class AlarmReceiver extends BroadcastReceiver
   override def onReceive(context: Context, intent: Intent)
   {
     log(mTag, "onReceive(): intent.getAction() = " + intent.getAction())
-    val powerManager = context.getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager]
-    val wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "AlarmReceiverWakeLock")
-    wakeLock.acquire()
-    AlarmReceiver.sWakeLock = Some(wakeLock)
+    AlarmReceiver.sWakeLock = None
+    AlarmReceiver.acquireWakeLock(context)
     context.startService(new Intent(context, classOf[MainService]))
   }
 }
@@ -30,7 +28,20 @@ object AlarmReceiver
 {
   private var sWakeLock: Option[PowerManager#WakeLock] = None
   
-  def releaseWakeLock() = {
+  def acquireWakeLock(context: Context)
+  {
+    sWakeLock match {
+      case Some(_) => ()
+      case None    =>
+        val powerManager = context.getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager]        
+        val wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "AlarmReceiverWakeLock")
+        wakeLock.acquire()
+        sWakeLock = Some(wakeLock)
+    }
+  }
+  
+  def releaseWakeLock()
+  {
     val tmpWakeLock = sWakeLock
     sWakeLock = None
     for(wl <- tmpWakeLock) wl.release()

@@ -99,7 +99,7 @@ object AndroidUtils
     notificationManager.notify(id, notification)
   }
   
-  def cancleNotification(context: Context, id: Int)
+  def cancelNotification(context: Context, id: Int)
   {
     val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
     notificationManager.cancel(id)
