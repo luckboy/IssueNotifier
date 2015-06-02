@@ -96,3 +96,11 @@ body {
 #issue, .comment {
 	border-bottom: 1px solid #e6e6e6;
 }
+
+#loading svg {
+	position: absolute;
+	left: 50%;
+	margin-left: -24pt;
+	margin-top: 5pt;
+	margin-bottom: 5pt;
+}

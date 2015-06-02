@@ -59,7 +59,21 @@ class IssueActivity extends Activity with TypedActivity
     mCommentListHtml = new IssueActivity.CommentListHtml("")
     mUnloadedCommentListFlag = new IssueActivity.UnloadedCommentListFlag(true)
     mIssueWebView.addJavascriptInterface(new IssueActivity.JSObject(f, mCommentListHtml, mUnloadedCommentListFlag), "IssueNotifierObject")
-    mHandler = new Handler()
+    val s = (
+        "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n" + 
+        "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n" +
+        "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
+        "<head>\n" +
+        "<link rel=\"stylesheet\" href=\"file:///android_asset/issue.css\"/>\n" +
+        "<script src=\"file:///android_asset/loading.js\" type=\"text/javascript\"></script>\n" +
+        "</head>\n" +
+        "<body onload=\"startLoadingAnimation()\">\n" +
+        "<div id=\"loading\"></div>" +
+        "</body>\n" +
+        "</html>")
+    mIssueWebView.loadDataWithBaseURL("file:///android_res/", s, "text/html", "UTF-8", "")
+	mHandler = new Handler()
+    startLoadingAnimation()
     mStopFlag = StopFlag(false)
     mCanLoad = false
     val tmpRepos = mRepos
@@ -77,31 +91,37 @@ class IssueActivity extends Activity with TypedActivity
       case Left(_)            =>
         showDialog(IssueActivity.DialogFetchingError)
       case Right(Some(issue)) =>
+        stopLoadingAnimation()
         mCurrentDate = new Date()
-        val s = (
+        val s2 = (
             "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n" + 
             "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n" +
             "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
             "<head>\n" +
             "<link rel=\"stylesheet\" href=\"file:///android_asset/issue.css\"/>\n" +
+            "<script src=\"file:///android_asset/loading.js\" type=\"text/javascript\"></script>\n" +
             "<script src=\"file:///android_asset/issue.js\" type=\"text/javascript\"></script>\n" +
             "</head>\n" +
             "<body onscroll=\"onScroll()\">\n" +
             htmlFromIssue(issue) + "\n" +
             "<div id=\"comments\"></div>\n" +
-            "<div id=\"loading\">Loading ...</div>" +
+            "<div id=\"loading\"></div>" +
             "</body>\n" +
             "</html>")
-        mIssueWebView.loadDataWithBaseURL("file:///android_res/", s, "text/html", "UTF-8", "")
+        mIssueWebView.loadDataWithBaseURL("file:///android_res/", s2, "text/html", "UTF-8", "")
         mCanLoad = true
         loadComments()
-      case Right(None)        => ()
+        startLoadingAnimation()
+      case Right(None)        =>
+        stopLoadingAnimation()
+        startLoadingAnimation()
     }
   }
   
   override def onDestroy()
   {
     mStopFlag.b = true
+    stopLoadingAnimation()
     super.onDestroy()
   }
 
@@ -179,12 +199,36 @@ class IssueActivity extends Activity with TypedActivity
       }
     }
   }
+  
+  private val mLoadingDrawingRunnable: Runnable = new Runnable() {
+    override def run()
+    {
+      val startTime = System.currentTimeMillis()
+      mIssueWebView.loadUrl("javascript:onDrawLoading()")
+      val timeDiff = System.currentTimeMillis() - startTime;
+      val interval = 20
+      if(interval - timeDiff > 0)
+        mHandler.postDelayed(mLoadingDrawingRunnable, interval - timeDiff)
+      else
+        mHandler.post(mLoadingDrawingRunnable)
+    }
+  }
+  
+  def startLoadingAnimation()
+  {
+    mHandler.post(mLoadingDrawingRunnable)
+  }
+  
+  def stopLoadingAnimation()
+  {
+    mHandler.removeCallbacks(mLoadingDrawingRunnable)
+  }
 
   override def onCreateDialog(id: Int, bundle: Bundle) =
     id match {
       case IssueActivity.DialogFetchingError =>
         createErrorDialog(this, getResources().getString(R.string.fetching_error_message))
-      case _                                         =>
+      case _                                 =>
         super.onCreateDialog(id, bundle)
     }
 }
@@ -218,6 +262,6 @@ object IssueActivity
     
     def areUnloadedComments(): Boolean = unloadedCommentListFlag.flag
     
-    //def log(s: String): Unit = AndroidUtils.log("IssueActivity.JSObject", s)
+    def log(s: String): Unit = AndroidUtils.log("IssueActivity.JSObject", s)
   }
 }
