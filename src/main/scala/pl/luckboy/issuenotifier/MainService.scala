@@ -168,7 +168,7 @@ class MainService extends Service
     log(mTag, "onStartCommand(): started")
     AlarmReceiver.createAndAcquireWakeLock(this)
     fetchAndNotify(mStopFlag)
-    Service.START_NOT_STICKY
+    Service.START_STICKY
   }
   
   override def onDestroy()
