@@ -126,7 +126,7 @@ class MainService extends Service
         log(mTag, "fetchAndNotify(): issueCount = " + issueCount)
         log(mTag, storeLastRepositoryTimestampInfos(this, mLastReposTimestampInfos))
         if(mustNotify) {
-          acquireNotificationWakeLock()
+          createAndAcquireNotificationWakeLock()
           val title = getResources().getQuantityString(R.plurals.notification_issues_title, issueCount)
           val msg = getResources().getQuantityString(R.plurals.notification_issues_message, issueCount)
           val intent = new Intent(MainReceiver.ActionIssuePairs)
@@ -166,7 +166,7 @@ class MainService extends Service
       mHasNotification = true;
     }
     log(mTag, "onStartCommand(): started")
-    AlarmReceiver.acquireWakeLock(this)
+    AlarmReceiver.createAndAcquireWakeLock(this)
     fetchAndNotify(mStopFlag)
     Service.START_NOT_STICKY
   }
@@ -189,7 +189,7 @@ class MainService extends Service
     log(mTag, "onDestroy(): stopped")
   }
   
-  private def acquireNotificationWakeLock()
+  private def createAndAcquireNotificationWakeLock()
   {
     val powerManager = getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager]
     val notificatinWakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "MainServiceWakeLock")

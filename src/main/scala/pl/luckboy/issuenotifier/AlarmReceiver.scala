@@ -19,7 +19,7 @@ class AlarmReceiver extends BroadcastReceiver
   {
     log(mTag, "onReceive(): intent.getAction() = " + intent.getAction())
     AlarmReceiver.sWakeLock = None
-    AlarmReceiver.acquireWakeLock(context)
+    AlarmReceiver.createAndAcquireWakeLock(context)
     context.startService(new Intent(context, classOf[MainService]))
   }
 }
@@ -28,7 +28,7 @@ object AlarmReceiver
 {
   private var sWakeLock: Option[PowerManager#WakeLock] = None
   
-  def acquireWakeLock(context: Context)
+  def createAndAcquireWakeLock(context: Context)
   {
     sWakeLock match {
       case Some(_) => ()
