@@ -112,9 +112,7 @@ class IssueActivity extends Activity with TypedActivity
         mCanLoad = true
         loadComments()
         startLoadingAnimation()
-      case Right(None)        =>
-        stopLoadingAnimation()
-        startLoadingAnimation()
+      case Right(None)        => ()
     }
   }
   
