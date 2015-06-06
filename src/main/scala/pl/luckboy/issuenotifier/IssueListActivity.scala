@@ -31,7 +31,7 @@ class IssueListActivity extends AbstractIssueListActivity[IssueInfo]
   
   override def onDestroy()
   {
-    log(mTag, "onCreated(): destroying ...")
+    log(mTag, "onDestroy(): destroying ...")
     super.onDestroy()
   }
   
