@@ -38,6 +38,7 @@
     <string name="settings_screen_vibration_summary_on">Vibration for notifications is enabled</string>
     <string name="settings_screen_vibration_summary_off">Vibration for notifications is disabled</string>
     <string name="settings_screen_delete_timestamps_title">Delete timestamps</string>
+    <string name="settings_screen_about">About</string>
     <string name="notification_service_title">IssueNotifier</string>
     <string name="notification_service_message">IssueNotifier is started.</string>
     <plurals name="notification_issues_title">
@@ -70,6 +71,7 @@
     <string name="not_found_repos_error_message">Repository isn\'t on server.</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="close">Close</string>
     <string name="details_title">Details</string>
     <string name="details_message_repos">Repository: %s</string>
     <string name="details_message_title">Title: %s</string>
@@ -80,4 +82,8 @@
     <string name="details_message_closed_at">Closed at: %s</string>
     <string name="details_message_created_at">Created at: %s</string>
     <string name="details_message_updated_at">Updated at: %s</string>
+    <string name="about_title">About</string>
+    <string name="about_message">&lt;b&gt;IssueNotifier&lt;/b&gt;&lt;br&gt;&lt;br&gt;IssueNotifier is application that notifies about issues from GitHub.&lt;br&gt;&lt;br&gt;Copyright &#169; 2015 Łukasz Szpakowski.&lt;br&gt;&lt;br&gt;This application is licensed under the GNU General Public License v3 or later. Click the License button to see the full licensing terms.&lt;br&gt;&lt;br&gt;This application is linked with some third party libraries. Click the Third party button to see more details.</string>
+    <string name="about_license">License</string>
+    <string name="about_third_party">Third party</string>
 </resources>

@@ -6,28 +6,44 @@
  ****************************************************************************/
 package pl.luckboy.issuenotifier
 import android.app.AlertDialog
+import android.app.Dialog
 import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
 import android.preference.Preference
 import android.preference.PreferenceActivity
+import android.widget.TextView
+import android.text.Html
+import android.text.SpannableString
 import AndroidUtils._
 import DataStorage._
 
 class SettingsActivity extends PreferenceActivity with TypedActivity
 {
   private val mTag = getClass().getSimpleName()
-    
-  private var mPreference: Preference = null
+  
+  private var mDeleteTimestampsPreference: Preference = null
+
+  private var mAboutPreference: Preference = null
   
   override def onCreate(bundle: Bundle)
   {
     super.onCreate(bundle)
     addPreferencesFromResource(R.xml.settings_screen)
-    mPreference = getPreferenceManager().findPreference("settings_delete_timestamps")
-    mPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+    mDeleteTimestampsPreference = getPreferenceManager().findPreference("settings_delete_timestamps")
+    mDeleteTimestampsPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
       override def onPreferenceClick(preference: Preference) =
         if(preference.getKey().equals("settings_delete_timestamps")) {
           SettingsActivity.this.showDialog(SettingsActivity.DialogDeleteTimestamps)
+          true
+        } else
+          false
+    })
+    mAboutPreference = getPreferenceManager().findPreference("settings_about")
+    mAboutPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+      override def onPreferenceClick(preference: Preference) =
+        if(preference.getKey().equals("settings_about")) {
+          SettingsActivity.this.showDialog(SettingsActivity.DialogAbout)
           true
         } else
           false
@@ -42,12 +58,44 @@ class SettingsActivity extends PreferenceActivity with TypedActivity
         createQuestionDialog(this, title, msg, true) {
           () => clearAllRepositoryTimestampInfos(SettingsActivity.this)
         }
+      case SettingsActivity.DialogAbout            =>
+        val builder = new AlertDialog.Builder(this)
+        builder.setIcon(android.R.drawable.ic_dialog_info)
+        builder.setTitle(getResources().getString(R.string.about_title))
+        builder.setView(getLayoutInflater().inflate(R.layout.about, null))
+        builder.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
+          override def onClick(dialog: DialogInterface, id: Int) = ()
+        })
+        builder.setNeutralButton(R.string.about_license, new DialogInterface.OnClickListener() {
+          override def onClick(dialog: DialogInterface, id: Int)
+          {
+            SettingsActivity.this.startActivity(new Intent(SettingsActivity.this, classOf[LicenseActivity]))
+          }
+        })
+        builder.setPositiveButton(R.string.about_third_party, new DialogInterface.OnClickListener() {
+          override def onClick(dialog: DialogInterface, id: Int)
+          {
+            SettingsActivity.this.startActivity(new Intent(SettingsActivity.this, classOf[ThirdPartyActivity]))
+          }
+        })
+        builder.create()
       case _                                       =>
         super.onCreateDialog(id, bundle)
     }
+  
+  override def onPrepareDialog(id: Int, dialog: Dialog, bundle: Bundle)
+  {
+    id match {
+      case SettingsActivity.DialogAbout =>
+        dialog.findViewById(R.id.aboutTextView).asInstanceOf[TextView].setText(new SpannableString(Html.fromHtml(getResources().getString(R.string.about_message))))
+      case _                            => ()
+    }
+    super.onPrepareDialog(id, dialog, bundle)
+  }
 }
 
 object SettingsActivity
 {
   private val DialogDeleteTimestamps = 0
+  private val DialogAbout = 1
 }

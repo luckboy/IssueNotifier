@@ -6,4 +6,5 @@
     <CheckBoxPreference android:key="settings_ringtone" android:summaryOn="@string/settings_screen_ringtone_summary_on" android:title="@string/settings_screen_ringtone_title" android:summaryOff="@string/settings_screen_ringtone_summary_off" android:defaultValue="true"/>
     <CheckBoxPreference android:key="settings_vibration" android:summaryOn="@string/settings_screen_vibration_summary_on" android:title="@string/settings_screen_vibration_title" android:summaryOff="@string/settings_screen_vibration_summary_off" android:defaultValue="true"/>
     <Preference android:key="settings_delete_timestamps" android:title="@string/settings_screen_delete_timestamps_title"/>
+    <Preference android:key="settings_about" android:title="@string/settings_screen_about"/>
 </PreferenceScreen>

@@ -31,5 +31,7 @@
                 <data android:scheme="package" android:path="pl.luckboy.issuenotifier"/>
             </intent-filter>
         </receiver>
+        <activity android:name="LicenseActivity"></activity>
+        <activity android:name="ThirdPartyActivity"></activity>
     </application>
 </manifest>
