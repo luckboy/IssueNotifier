@@ -109,9 +109,12 @@ class MainService extends Service
             val tmpUpdatedIssueAt = tmpLastReposTimestampInfos.get(repos).map {
               reposTimestampInfo => reposTimestampInfo.updatedIssueAt
             }.getOrElse(new Date(0))
-            val updatedIssueAt = issueInfos.foldLeft(tmpUpdatedIssueAt) {
-              case (date, issueInfo) => if(date.compareTo(issueInfo.updatedAt) > 0) date else issueInfo.updatedAt
-            }
+            val updatedIssueAt = if(!tmpSortingByCreated)
+              issueInfos.foldLeft(tmpUpdatedIssueAt) {
+                case (date, issueInfo) => if(date.compareTo(issueInfo.updatedAt) > 0) date else issueInfo.updatedAt
+              }
+            else
+              tmpUpdatedIssueAt
             repos -> RepositoryTimestampInfo(createdIssueAt, updatedIssueAt)
         }.toMap
         val mustNotify = issueInfoLists.exists { !_._2.isEmpty }
