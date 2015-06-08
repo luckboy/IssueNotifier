@@ -177,6 +177,7 @@ class MainService extends Service
   override def onDestroy()
   {
     log(mTag, "onDestroy(): stopping ...")
+    AlarmReceiver.releaseWakeLock()
     cancelNotification(this, 0)
     if(mStopFlag != null) mStopFlag.b = true
     if(mHandler != null) mHandler.removeCallbacksAndMessages(null)

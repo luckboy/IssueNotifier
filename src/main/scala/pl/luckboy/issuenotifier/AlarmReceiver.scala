@@ -31,8 +31,9 @@ object AlarmReceiver
   def createAndAcquireWakeLock(context: Context)
   {
     sWakeLock match {
-      case Some(_) => ()
-      case None    =>
+      case Some(wakeLock) => 
+        if(!wakeLock.isHeld()) wakeLock.acquire()
+      case None           =>
         val powerManager = context.getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager]        
         val wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "AlarmReceiverWakeLock")
         wakeLock.acquire()
