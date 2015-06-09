@@ -4,33 +4,48 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/userNameTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/add_repos_user_name"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+    <ScrollView
+        android:id="@+id/addReposScrollView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
 
-    <EditText
-        android:id="@+id/userNameEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10" >
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical" >
 
-        <requestFocus />
-    </EditText>
+            <TextView
+                android:id="@+id/userNameTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_repos_user_name"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <TextView
-        android:id="@+id/nameTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/add_repos_name"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+            <EditText
+                android:id="@+id/userNameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10" >
 
-    <EditText
-        android:id="@+id/nameEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10" />
+                <requestFocus />
+
+            </EditText>
+
+            <TextView
+                android:id="@+id/nameTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_repos_name"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <EditText
+                android:id="@+id/nameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10" >
+            </EditText>
+
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>
