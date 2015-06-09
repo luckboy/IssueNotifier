@@ -13,6 +13,7 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
+import android.text.method.ScrollingMovementMethod
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
@@ -177,6 +178,7 @@ abstract class AbstractIssueListActivity[T <: AnyRef] extends Activity with Type
                 String.format(rsrcs.getString(R.string.details_message_created_at), textFromDateForLongFormat(issueInfo.createdAt)) + "\n" +
                 String.format(rsrcs.getString(R.string.details_message_updated_at), textFromDateForLongFormat(issueInfo.updatedAt)))
             val textView = dialog.findViewById(R.id.detailsTextView).asInstanceOf[TextView]
+            textView.setMovementMethod(new ScrollingMovementMethod())
             textView.setText(s)
           case None      => ()
         }

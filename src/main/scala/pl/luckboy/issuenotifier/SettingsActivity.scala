@@ -12,9 +12,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.preference.Preference
 import android.preference.PreferenceActivity
-import android.widget.TextView
 import android.text.Html
 import android.text.SpannableString
+import android.text.method.ScrollingMovementMethod
+import android.widget.TextView
 import AndroidUtils._
 import DataStorage._
 
@@ -87,7 +88,9 @@ class SettingsActivity extends PreferenceActivity with TypedActivity
   {
     id match {
       case SettingsActivity.DialogAbout =>
-        dialog.findViewById(R.id.aboutTextView).asInstanceOf[TextView].setText(new SpannableString(Html.fromHtml(getResources().getString(R.string.about_message))))
+        val textView = dialog.findViewById(R.id.aboutTextView).asInstanceOf[TextView]
+        textView.setMovementMethod(new ScrollingMovementMethod())
+        textView.setText(new SpannableString(Html.fromHtml(getResources().getString(R.string.about_message))))
       case _                            => ()
     }
     super.onPrepareDialog(id, dialog, bundle)
