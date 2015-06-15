@@ -21,6 +21,7 @@ import android.widget.ArrayAdapter
 import android.widget.AdapterView
 import android.widget.CheckBox
 import android.widget.CompoundButton
+import android.widget.ImageView
 import android.widget.ListView
 import android.widget.EditText
 import android.widget.TextView
@@ -251,16 +252,19 @@ object MainActivity
       val listView = parent.asInstanceOf[ListView]
       if(convertView == null) {
         view = activity.getLayoutInflater().inflate(R.layout.repos_item, null)
+        val imageView = view.findViewById(R.id.reposItemImageView).asInstanceOf[ImageView]
         val textView = view.findViewById(R.id.reposItemTextView).asInstanceOf[TextView]
         val checkBox = view.findViewById(R.id.reposItemCheckBox).asInstanceOf[CheckBox]
         val viewHolder = RepositoryListAdapter.ViewHolder(position, textView, checkBox)
         view.setTag(viewHolder)
-        textView.setOnClickListener(new View.OnClickListener() {
+        val onClickListener = new View.OnClickListener() {
           override def onClick(view: View)
           {
-            listView.performItemClick(convertView, viewHolder.position, getItemId(position)) 
+            listView.getOnItemClickListener().onItemClick(listView, convertView, viewHolder.position, getItemId(position))
           }
-        })
+        }
+        imageView.setOnClickListener(onClickListener)
+        textView.setOnClickListener(onClickListener)
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
           override def onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean)
           {

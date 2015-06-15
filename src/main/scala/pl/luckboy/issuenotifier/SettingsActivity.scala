@@ -9,6 +9,7 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.preference.Preference
 import android.preference.PreferenceActivity
@@ -67,18 +68,27 @@ class SettingsActivity extends PreferenceActivity with TypedActivity
         builder.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
           override def onClick(dialog: DialogInterface, id: Int) = ()
         })
-        builder.setNeutralButton(R.string.about_license, new DialogInterface.OnClickListener() {
+        val licenseId = R.string.about_license
+        val onLicenseClickListener = new DialogInterface.OnClickListener() {
           override def onClick(dialog: DialogInterface, id: Int)
           {
             SettingsActivity.this.startActivity(new Intent(SettingsActivity.this, classOf[LicenseActivity]))
           }
-        })
-        builder.setPositiveButton(R.string.about_third_party, new DialogInterface.OnClickListener() {
+        }
+        val thirdPartyId = R.string.about_third_party
+        val onThirdPartyClickListener = new DialogInterface.OnClickListener() {
           override def onClick(dialog: DialogInterface, id: Int)
           {
             SettingsActivity.this.startActivity(new Intent(SettingsActivity.this, classOf[ThirdPartyActivity]))
           }
-        })
+        }
+        if(Build.VERSION.SDK_INT >= 14) {
+          builder.setNeutralButton(licenseId, onLicenseClickListener)
+          builder.setPositiveButton(thirdPartyId, onThirdPartyClickListener)
+        } else {
+          builder.setNeutralButton(thirdPartyId, onThirdPartyClickListener)
+          builder.setPositiveButton(licenseId, onLicenseClickListener)
+        }
         builder.create()
       case _                                       =>
         super.onCreateDialog(id, bundle)

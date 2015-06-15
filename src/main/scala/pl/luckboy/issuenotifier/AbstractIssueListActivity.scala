@@ -219,7 +219,7 @@ object AbstractIssueListActivity
     	view.setOnClickListener(new View.OnClickListener() {
           override def onClick(view: View)
           {
-            if(position < items.size()) listView.performItemClick(convertView, viewHolder.position, getItemId(position)) 
+            if(position < items.size()) listView.getOnItemClickListener().onItemClick(listView, convertView, viewHolder.position, getItemId(position)) 
           }
         })
     	view.setOnLongClickListener(new View.OnLongClickListener() {
