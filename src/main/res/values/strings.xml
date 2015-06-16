@@ -83,7 +83,7 @@
     <string name="details_message_created_at">Created at: %s</string>
     <string name="details_message_updated_at">Updated at: %s</string>
     <string name="about_title">About</string>
-    <string name="about_message">&lt;b&gt;IssueNotifier 0.1.0&lt;/b&gt;&lt;br&gt;&lt;br&gt;IssueNotifier is application that notifies about issues from GitHub.&lt;br&gt;&lt;br&gt;Copyright &#169; 2015 Łukasz Szpakowski.&lt;br&gt;&lt;br&gt;This application is licensed under the GNU General Public License v3 or later. Click the License button to see the full licensing terms.&lt;br&gt;&lt;br&gt;This application is linked with some third party libraries. Click the Third party button to see more details.</string>
+    <string name="about_message">&lt;b&gt;IssueNotifier 0.1.1&lt;/b&gt;&lt;br&gt;&lt;br&gt;IssueNotifier is application that notifies about issues from GitHub.&lt;br&gt;&lt;br&gt;Copyright &#169; 2015 Łukasz Szpakowski.&lt;br&gt;&lt;br&gt;This application is licensed under the GNU General Public License v3 or later. Click the License button to see the full licensing terms.&lt;br&gt;&lt;br&gt;This application is linked with some third party libraries. Click the Third party button to see more details.</string>
     <string name="about_license">License</string>
     <string name="about_third_party">Third party</string>
 </resources>

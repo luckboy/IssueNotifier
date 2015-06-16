@@ -13,8 +13,8 @@ object Build extends Build
           AndroidManifestGenerator.settings ++
           TypedResources.settings ++
           Seq(name := "IssueNotifier",
-              version := "0.1.0",
-              versionCode := 1,
+              version := "0.1.1",
+              versionCode := 2,
               scalaVersion := "2.9.2",
               platformName in Android := "android-11",
               useProguard in Android := true,
